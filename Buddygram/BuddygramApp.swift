@@ -22,10 +22,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct BuddygramApp: App {
+    // Firebase로 대체
+    
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
+        let schema = Schema([ TempModel.self, ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
@@ -34,7 +34,7 @@ struct BuddygramApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
-
+    
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
@@ -43,5 +43,17 @@ struct BuddygramApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+    }
+}
+
+// 🔹 SwiftData용 에러 방지 임시 데이터 모델 추가 - 추후 삭제
+@Model
+class TempModel {
+    var id: UUID
+    var name: String
+
+    init(id: UUID = UUID(), name: String) {
+        self.id = id
+        self.name = name
     }
 }
