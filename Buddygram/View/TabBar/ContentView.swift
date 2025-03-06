@@ -20,6 +20,9 @@ struct ContentView: View {
                 }
                 .tag(0)
             
+            // 채팅 - 추후
+            // ChatView()
+            
             // 업로드
             UploadView()
                 .tabItem {
