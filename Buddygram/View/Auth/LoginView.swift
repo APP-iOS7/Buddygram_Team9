@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct LoginView: View {
-    @State private var email = ""
-    @State private var password = ""
-    @State private var isPasswordVisible = false
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
+    @State private var showAlert: Bool = false
+    @State private var isPasswordVisible: Bool = false
     
     var body: some View {
             NavigationView {
@@ -24,14 +25,14 @@ struct LoginView: View {
                 
                 // 이메일 & 비밀번호 텍스트필드
                 VStack(spacing: 12) {
-                    TextField("Email", text: $email)
+                    TextField("Email", text: $authViewModel.email)
                         .modifier(CustomSignTextFieldModifier())
                     
                     HStack(spacing: 0) {
                         if isPasswordVisible {
-                            TextField("Password", text: $password)
+                            TextField("Password", text: $authViewModel.password)
                         } else {
-                            SecureField("Password", text: $password)
+                            SecureField("Password", text: $authViewModel.password)
                         }
                         
                         Button(action: {
@@ -56,6 +57,10 @@ struct LoginView: View {
                         Spacer()
                     }
                     .padding(.top, 4)
+                    
+                    if !authViewModel.errorMessage.isEmpty {
+                        
+                    }
                 }
                 
                 // 로그인 & 회원가입 버튼

@@ -46,7 +46,7 @@ class AuthViewModel: ObservableObject {
         setupValidations()
     }
     
-    // 유효성 검사 설정
+    // 이메일, 패스워드 유효성 검사 설정
     private func setupValidations() {
         $email
             .debounce(for: 0.5, scheduler: RunLoop.main)
