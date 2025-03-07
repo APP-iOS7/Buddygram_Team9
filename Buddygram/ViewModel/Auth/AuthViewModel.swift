@@ -85,32 +85,57 @@ class AuthViewModel: ObservableObject {
         guard !email.isEmpty else {
             errorMessage = "이메일을 입력해주세요."
             completion(false)
+            return
+        }
+        
+        guard !password.isEmpty else {
+            errorMessage = "비밀번호를 입력해주세요."
+            completion(false)
+            return
+        }
+        
+        isLoading = true
+        errorMessage = ""
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self = self else { return }
+            
+            self.isLoading = false
+            
+            if let user = self.users.first(where: { $0.email == self.email && $0.password == self.password}) {
+                self.currentUser = user
+                self.isAuthenticated = true
+                completion(true)
+            } else {
+                self.errorMessage = "이메일 또는 비밀번호가 올바르지 않습니다."
+                completion(false)
+            }
         }
     }
     
     // SignUp 회원가입
-    func signUp(username: String, email: String, password: String) -> Bool {
-        // 유효성 검사 : 이메일 중복 확인
-        if users.contains(where: { $0.email == email }) {
-            return false
+    func signUp(completion: @escaping (Bool) -> Void = {_ in}) {
+        // 유효성 검사
+        guard !email.isEmpty else {
+            errorMessage = "이메일을 입력해주세요."
+            return
         }
         
-        let newUser = User(
-            id: UUID().uuidString,
-            username: username,
-            email: email,
-            profileImageURL: nil,
-            createdAt: Date(),
-            password: password
-        )
+        guard !password.isEmpty else {
+            errorMessage = "비밀번호를 입력해주세요."
+            return
+        }
         
-        // 사용자 배열에 추가 (실제로는 DB에 저장)
-        users.append(newUser)
+        guard isEmailValid else {
+            errorMessage = "올바른 이메일 형식이 아닙니다."
+            return
+        }
         
-        // 로그인 처리
-        currentUser = newUser
-        isAuthenticated = true
-        return true
+        guard isPasswordValid else {
+            errorMessage = "비밀번호는 8자 이상, 대소문자, 숫자, 특수문자를 포함해야 합니다."
+            return
+        }
+        
     }
     
     
