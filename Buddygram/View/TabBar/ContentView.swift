@@ -10,84 +10,47 @@ import SwiftData
 
 struct ContentView: View {
     @State private var selectedTab = 0
-<<<<<<< HEAD
+
     @State private var posts: [FeedPost] = [
         FeedPost(username: "user1", image: "post1", isLiked: false),
         FeedPost(username: "user2", image: "post2", isLiked: false),
         FeedPost(username: "user3", image: "post3", isLiked: false)
     ]
-    
-    var body: some View {
-        TabView(selection: $selectedTab) {
-            // 홈
-            HomeView(posts: $posts)
-                .tabItem {
-                    Image(systemName: "house.fill")
-                }
-                .tag(0)
             
-            // 채팅 - 추후
-             ChatListView()
-                .tabItem {
-                    Image(systemName: "paperplane.fill")
-                }
-                .tag(1)
-            
-            // 업로드
-            UploadView()
-                .tabItem {
-                    Image(systemName: "plus.square.fill")
-                }
-                .tag(2)
-                
-            
-            // 좋아요
-            LikeView(posts: $posts)
-                .tabItem {
-                    Image(systemName: "heart.fill")
-                }
-                .tag(3)
-            
-            
-            // 프로필
-            ProfileView()
-                .tabItem {
-                    Image(systemName: "person.circle.fill")
-                }
-                .tag(4)
-            
-=======
     @StateObject private var authViewModel = AuthViewModel()
     
     var body: some View {
         Group {
             if authViewModel.isAuthenticated {
-                
                 TabView(selection: $selectedTab) {
                     // 홈
-                    HomeView()
+                    HomeView(posts: $posts)
                         .tabItem {
                             Image(systemName: "house.fill")
                         }
                         .tag(0)
                     
                     // 채팅 - 추후
-                    // ChatView()
+                    ChatListView()
+                        .tabItem {
+                            Image(systemName: "paperplane.fill")
+                        }
+                        .tag(1)
                     
                     // 업로드
                     UploadView()
                         .tabItem {
                             Image(systemName: "plus.square.fill")
                         }
-                        .tag(1)
+                        .tag(2)
                     
                     
                     // 좋아요
-                    LikeView()
+                    LikeView(posts: $posts)
                         .tabItem {
                             Image(systemName: "heart.fill")
                         }
-                        .tag(2)
+                        .tag(3)
                     
                     
                     // 프로필
@@ -95,13 +58,12 @@ struct ContentView: View {
                         .tabItem {
                             Image(systemName: "person.circle.fill")
                         }
-                        .tag(3)
-                    
+                        .tag(4)
                 }
+               
             } else {
                 LoginView()
             }
->>>>>>> main
         }
         .environmentObject(authViewModel)
     }
