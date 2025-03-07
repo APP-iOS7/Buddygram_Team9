@@ -59,5 +59,9 @@ class AuthViewModel: ObservableObject {
         return false
     }
     
-    
+    // SignOut 로그아웃
+    func signOut() {
+        currentUser = nil
+        isAuthenticated = false
+    }
 }
