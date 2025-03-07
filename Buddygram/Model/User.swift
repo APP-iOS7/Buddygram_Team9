@@ -11,15 +11,11 @@ import Combine
 import Firebase
 
 struct User: Identifiable, Codable {
-    let id: String  // Firebase Auth UID
+    var id: String
     var username: String
     var email: String
-    var fullName: String?
     var profileImageURL: String?
-    var bio: String?
-    var joinDate: Date
-    var postsCount: Int
-    var followersCount: Int
-    var followingCount: Int
-    var likedPosts: [String]  // 좋아요한 게시물 ID 목록
+    var createdAt: Date
+    var likedPostIDs: [String] = []
+    var password: String // 로컬 테스트용, Firebase 사용 시 제거
 }
