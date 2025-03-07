@@ -240,7 +240,7 @@ class AuthViewModel: ObservableObject {
         resetFields()
     }
     
-    private func resetFields() {
+    func resetFields() {
         email = ""
         password = ""
         username = ""

@@ -25,14 +25,14 @@ struct LoginView: View {
                 
                 // 이메일 & 비밀번호 텍스트필드
                 VStack(spacing: 12) {
-                    TextField("Email", text: $authViewModel.email)
+                    TextField("Email (test@test.com)", text: $authViewModel.email)
                         .modifier(CustomSignTextFieldModifier())
                     
                     HStack(spacing: 0) {
                         if isPasswordVisible {
-                            TextField("Password", text: $authViewModel.password)
+                            TextField("Password (Qwer12!@)", text: $authViewModel.password)
                         } else {
-                            SecureField("Password", text: $authViewModel.password)
+                            SecureField("Password (Qwer12!@)", text: $authViewModel.password)
                         }
                         
                         Button(action: {
@@ -59,7 +59,10 @@ struct LoginView: View {
                     .padding(.top, 4)
                     
                     if !authViewModel.errorMessage.isEmpty {
-                        
+                        Text(authViewModel.errorMessage)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.red)
+                            .padding(.top, 8)
                     }
                 }
                 
@@ -67,15 +70,24 @@ struct LoginView: View {
                 VStack(spacing: 12) {
                     Button(action: {
                         // 로그인 이벤트
-                        
+                        authViewModel.signIn() { success in
+                            if !success && !authViewModel.errorMessage.isEmpty {
+                                showAlert = true
+                            }
+                        }
                     }) {
-                        Text("로그인")
-                            .font(.system(size: btnFontSize, weight: .bold))
-                            .foregroundColor(Color("TextColor"))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: btnHeight)
-                            .background(Color("PrimaryButtonColor"))
-                            .cornerRadius(btnCornerRadius)
+                        if authViewModel.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: Color("TextColor")))
+                        } else {
+                            Text("로그인")
+                                .font(.system(size: btnFontSize, weight: .bold))
+                                .foregroundColor(Color("TextColor"))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: btnHeight)
+                                .background(Color("PrimaryButtonColor"))
+                                .cornerRadius(btnCornerRadius)
+                        }
                     }
                     
                     // 회원가입 링크
@@ -134,6 +146,13 @@ struct LoginView: View {
                             .foregroundStyle(Color("PlaceholderColor"))
                     }
                 }
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("로그인 오류"),
+                    message: Text(authViewModel.errorMessage),
+                    dismissButton: .default(Text("확인"))
+                )
             }
         }
     } // body
