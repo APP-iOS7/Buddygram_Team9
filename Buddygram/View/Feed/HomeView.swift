@@ -79,7 +79,7 @@ struct PostView: View {
                         .foregroundColor(post.isLiked ? .red : .red)
                 }
 
-                // 댓글 버튼 (한 화면에서 댓글 표시)
+                // 댓글 버튼
                 Button(action: {
                     isShowingComments.toggle()
                 }) {
@@ -87,7 +87,7 @@ struct PostView: View {
                         .foregroundColor(.green)
                 }
 
-                // 채팅 버튼 (화면 이동)
+                // 채팅 버튼
                 NavigationLink(destination: ChatView(username: post.username)) {
                     Image(systemName: "paperplane.fill")
                         .foregroundColor(.green)
@@ -116,7 +116,7 @@ struct PostView: View {
                         Button(action: {
                             if !newComment.isEmpty {
                                 post.comments.append(newComment) // 댓글 추가
-                                newComment = "" // 입력 필드 초기화
+                                newComment = ""
                             }
                         }) {
                             Image(systemName: "paperplane.fill")
