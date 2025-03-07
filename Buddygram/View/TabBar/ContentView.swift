@@ -26,7 +26,6 @@ struct ContentView: View {
                     
                     // 채팅 - 추후
                     // ChatView()
-                    // 여기에 탭 하나 추가해서 로그아웃되서 로그인 페이지 뷰로 가능 기능 넣어줘
                     
                     // 업로드
                     UploadView()

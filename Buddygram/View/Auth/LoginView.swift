@@ -62,6 +62,7 @@ struct LoginView: View {
                 VStack(spacing: 12) {
                     Button(action: {
                         // 로그인 이벤트
+                        
                     }) {
                         Text("로그인")
                             .font(.system(size: btnFontSize, weight: .bold))
