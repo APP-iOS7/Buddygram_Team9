@@ -97,6 +97,7 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = ""
         
+        // 테스트를 위한 지연 시뮬레이터
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             guard let self = self else { return }
             
@@ -116,32 +117,135 @@ class AuthViewModel: ObservableObject {
     // SignUp 회원가입
     func signUp(completion: @escaping (Bool) -> Void = {_ in}) {
         // 유효성 검사
+        guard !username.isEmpty else {
+            errorMessage = "사용자 이름을 입력해주세요."
+            completion(false)
+            return
+        }
+        
         guard !email.isEmpty else {
             errorMessage = "이메일을 입력해주세요."
+            completion(false)
             return
         }
         
         guard !password.isEmpty else {
             errorMessage = "비밀번호를 입력해주세요."
+            completion(false)
+            return
+        }
+        
+        guard !confirmPassword.isEmpty else {
+            errorMessage = "비밀번호 확인을 입력해주세요."
+            completion(false)
+            return
+        }
+        
+        guard isUsernameValid else {
+            errorMessage = "사용자 이름은 3자 이상이어야 합니다."
+            completion(false)
             return
         }
         
         guard isEmailValid else {
             errorMessage = "올바른 이메일 형식이 아닙니다."
+            completion(false)
             return
         }
         
         guard isPasswordValid else {
             errorMessage = "비밀번호는 8자 이상, 대소문자, 숫자, 특수문자를 포함해야 합니다."
+            completion(false)
             return
         }
         
+        guard password == confirmPassword else {
+            errorMessage = "비밀번호가 일치하지 않습니다."
+            completion(false)
+            return
+        }
+        
+        guard agreeToTerms else {
+            errorMessage = "이용약관에 동의해주세요."
+            completion(false)
+            return
+        }
+        
+        if users.contains(where: { $0.email == email }) {
+            errorMessage = "이미 사용 중인 이메일입니다."
+            completion(false)
+            return
+        }
+        
+        isLoading = true
+        errorMessage = ""
+        
+        // 테스트를 위한 지연 시뮬레이터
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self = self else { return }
+            
+            self.isLoading = false
+            
+            let newUser = User(
+                id: UUID().uuidString,
+                username: self.username,
+                email: self.email,
+                profileImageURL: nil,
+                createdAt: Date(),
+                password: self.password
+            )
+            
+            self.users.append(newUser)
+            
+            self.currentUser = newUser
+            self.isAuthenticated = true
+            
+            self.resetFields()
+            
+            completion(true)
+        }
     }
     
+    // 소셜 로그인 함수
+    func socialLogin(provider: String, completion: @escaping (Bool) -> Void = {_ in }) {
+        isLoading = true
+        errorMessage = ""
+        
+        // 테스트를 위한 지연 시뮬레이션
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self = self else { return }
+            
+            self.isLoading = false
+            
+            // 테스트용 사용자
+            let socialUser = User(
+                id: UUID().uuidString,
+                username: "\(provider)User",
+                email: "\(provider)@example.com",
+                profileImageURL: nil,
+                createdAt: Date(),
+                password: ""
+            )
+            
+            self.currentUser = socialUser
+            self.isAuthenticated = true
+            completion(true)
+        }
+    }
     
     // SignOut 로그아웃
     func signOut() {
         currentUser = nil
         isAuthenticated = false
+        resetFields()
+    }
+    
+    private func resetFields() {
+        email = ""
+        password = ""
+        username = ""
+        confirmPassword = ""
+        agreeToTerms = false
+        errorMessage = ""
     }
 }
