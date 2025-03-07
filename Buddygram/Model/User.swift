@@ -17,4 +17,5 @@ struct User: Identifiable, Codable {
     var profileImageURL: String?
     var createdAt: Date
     var likedPostIDs: [String] = []
+    var password: String // 로컬 테스트용, Firebase 사용 시 제거
 }
