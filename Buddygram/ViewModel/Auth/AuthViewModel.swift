@@ -47,4 +47,17 @@ class AuthViewModel: ObservableObject {
         return true
     }
     
+    // SignIn 로그인
+    func signIn(email: String, password: String) -> Bool {
+        // 이메일로 사용자 찾기
+        if let user = users.first(where: { $0.email == email }) {
+            // + 패스워드 확인 추가
+            currentUser = user
+            isAuthenticated = true
+            return true
+        }
+        return false
+    }
+    
+    
 }

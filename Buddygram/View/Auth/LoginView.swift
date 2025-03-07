@@ -73,7 +73,7 @@ struct LoginView: View {
                     }
                     
                     // 회원가입 링크
-                    NavigationLink(destination: SignView().navigationBarHidden(true)) {
+                    NavigationLink(destination: SignUpView().navigationBarHidden(true)) {
                         HStack {
                             Text("계정이 없으신가요?")
                                 .font(.system(size: 14))
