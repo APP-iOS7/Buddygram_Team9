@@ -52,7 +52,7 @@ struct ChatView: View {
                         Image(systemName: "paperplane.fill")
                             .foregroundColor(.white)
                             .padding()
-                            .background(Color(red: 0.4, green: 0.9, blue: 0.2))
+                            .background(Color(red: 0.4, green: 0.8, blue: 0.2))
                             .clipShape(Circle())
                     }
                 }
@@ -87,7 +87,7 @@ struct MessageBubble: View {
             
             Text(text)
                 .padding()
-                .background(isMe ? Color.green : Color(red: 0.8, green: 0.2, blue: 0.7))
+                .background(isMe ? Color(red: 0.4, green: 0.8, blue: 0.2) : Color(red: 0.8, green: 0.3, blue: 0.8))
                 .foregroundColor(isMe ? .white : .white)
                 .cornerRadius(15)
                 .shadow(radius: 2)
