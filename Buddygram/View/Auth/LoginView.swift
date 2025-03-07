@@ -14,7 +14,7 @@ struct LoginView: View {
     @State private var isPasswordVisible: Bool = false
     
     var body: some View {
-            NavigationView {
+        NavigationView {
             VStack(spacing: 0) {
                 
                 Text("Buddygram")
@@ -103,17 +103,17 @@ struct LoginView: View {
                         }
                     }
                     /*
-                    Button(action: {
-                        // 회원가입 이벤트
-                    }) {
-                        Text("회원가입")
-                            .font(.system(size: btnFontSize, weight: .bold))
-                            .foregroundColor(Color("TextColor"))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: btnHeight)
-                            .background(Color("SecondaryButtonColor"))
-                            .cornerRadius(btnCornerRadius)
-                    }
+                     Button(action: {
+                     // 회원가입 이벤트
+                     }) {
+                     Text("회원가입")
+                     .font(.system(size: btnFontSize, weight: .bold))
+                     .foregroundColor(Color("TextColor"))
+                     .frame(maxWidth: .infinity)
+                     .frame(height: btnHeight)
+                     .background(Color("SecondaryButtonColor"))
+                     .cornerRadius(btnCornerRadius)
+                     }
                      */
                 }
                 .padding(.horizontal)
@@ -140,20 +140,20 @@ struct LoginView: View {
                     Button(action: {
                         // 버튼 누르면 키보드 내려가는 이벤트 처리
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-
+                        
                     }) {
                         Image(systemName: "keyboard.chevron.compact.down")
                             .foregroundStyle(Color("PlaceholderColor"))
                     }
                 }
             }
-            .alert(isPresented: $showAlert) {
+            /*.alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("로그인 오류"),
                     message: Text(authViewModel.errorMessage),
                     dismissButton: .default(Text("확인"))
                 )
-            }
+            }*/
         }
     } // body
 }
