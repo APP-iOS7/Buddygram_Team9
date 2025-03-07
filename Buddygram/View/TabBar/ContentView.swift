@@ -24,7 +24,7 @@ struct ContentView: View {
             // ChatView()
             
             // 업로드
-            UploadView()
+            UploadView(selectedTab: $selectedTab)
                 .tabItem {
                     Image(systemName: "plus.square.fill")
                 }
