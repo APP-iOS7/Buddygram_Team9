@@ -308,6 +308,53 @@ class AuthViewModel: ObservableObject {
         errorMessage = ""
     }
     
+    // 추가: Firebase 회원탈퇴
+    func deleteAccount(password: String, completion: @escaping (Bool, String?) -> Void) {
+        isLoading = true
+        
+        guard let currentUser = Auth.auth().currentUser, let email = currentUser.email else {
+            isLoading = false
+            completion(false, "현재 로그인된 사용자가 없습니다.")
+            return
+        }
+        
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        
+        currentUser.reauthenticate(with: credential) { [weak self] _, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    completion(false, "비밀번호가 일치하지 않습니다.")
+                }
+                return
+            }
+            
+            let db = Firestore.firestore()
+            db.collection("users").document(currentUser.uid).delete { [weak self] error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Firestore 사용자 데이터 삭제 오류: \(error.localizedDescription)")
+                }
+                
+                currentUser.delete { [weak self] error in
+                    self?.isLoading = false
+                    
+                    if let error = error {
+                        completion(false, "계정 삭제 중 오류가 발생했습니다.: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    self?.currentUser = nil
+                    self?.isAuthenticated = false
+                    self?.resetFields()
+                    completion(true, nil)
+                }
+            }
+        }
+    }
     
     // 추가: Firebase 오류 메시지 처리 함수
     private func handleFirebaseError(_ error: Error) -> String {
