@@ -54,7 +54,7 @@ struct ContentView: View {
                     
                     
                     // 프로필
-                    ProfileView()
+                    ProfileView(selectedTab: $selectedTab)
                         .tabItem {
                             Image(systemName: "person.circle.fill")
                         }
@@ -66,6 +66,11 @@ struct ContentView: View {
             }
         }
         .environmentObject(authViewModel)
+        .onChange(of: authViewModel.isAuthenticated) {
+            if !authViewModel.isAuthenticated {
+                selectedTab = 0
+            }
+        }
     }
     
 }

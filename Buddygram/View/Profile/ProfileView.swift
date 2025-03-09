@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @Binding var selectedTab: Int
     @State private var showingPasswordDialog = false
     @State private var showingDeleteConfirmation = false
     @State private var showingErrorAlert = false
@@ -32,6 +33,7 @@ struct ProfileView: View {
             
             Button(action: {
                 authViewModel.signOut()
+                selectedTab = 0
             }) {
                 Text("로그아웃")
                     .fontWeight(.semibold)
@@ -91,7 +93,7 @@ struct ProfileView: View {
     private func deleteAccount() {
         authViewModel.deleteAccount(password: deletePassword) { success, message in
             if success {
-                
+                selectedTab = 0
             } else if let message = message {
                 errorMessage = message
                 showingErrorAlert = true
@@ -143,8 +145,4 @@ struct PasswordInputView: View {
         .background(Color(.systemBackground))
         .cornerRadius(20)
     }
-}
-
-#Preview {
-    ProfileView()
 }
