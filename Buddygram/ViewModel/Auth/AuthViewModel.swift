@@ -39,13 +39,14 @@ class AuthViewModel: ObservableObject {
         setupAuthStateListener()
     }
     
-    // 추가 : Fire
+    // 추가 : Firebase, 메모리 관리
     deinit {
         if let handle = handle {
             Auth.auth().removeStateDidChangeListener(handle)
         }
     }
     
+    // 추가 : Firebase 인증 상태 리스너 설정 함수
     private func setupAuthStateListener() {
         handle = Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
             guard let self = self else { return }
@@ -59,7 +60,35 @@ class AuthViewModel: ObservableObject {
         }
     }
     
-    
+    // 추가 : Firebase Firestore에서 사용자 정보 가져오는 함수
+    private func fetchUserData(uid: String) {
+        let db = Firestore.firestore()
+        
+        db.collection("users").document(uid).getDocument { [weak self] (document, error) in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("사용자 정보 가져오기 오류: \(error.localizedDescription)")
+                return
+            }
+            
+            if let document = document, document.exists, let userData = document.data() {
+                let user = User(
+                    id: uid,
+                    username: userData["username"] as? String ?? "",
+                    email: userData["email"] as? String ?? "",
+                    profileImageURL: userData["profileImageURL"] as? String,
+                    createdAt: (userData["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
+                    likedPostIDs: userData["likedPostIDs"] as? [String] ?? []
+                )
+                
+                DispatchQueue.main.async {
+                    self.currentUser = user
+                    self.isAuthenticated = true
+                }
+            }
+        }
+    }
     
     // 이메일, 패스워드 유효성 검사 설정
     private func setupValidations() {
@@ -112,19 +141,19 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = ""
         
-        // 테스트를 위한 지연 시뮬레이터
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        // 추가: Firebase 인증 로그인 로직
+        Auth.auth().signIn(withEmail: email, password: password) { [weak self] (authResult, error) in
             guard let self = self else { return }
             
-            self.isLoading = false
-            
-            if let user = self.users.first(where: { $0.email == self.email && $0.password == self.password}) {
-                self.currentUser = user
-                self.isAuthenticated = true
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    self.errorMessage = self.handleFirebaseError(error)
+                    completion(false)
+                    return
+                }
                 completion(true)
-            } else {
-                self.errorMessage = "이메일 또는 비밀번호가 올바르지 않습니다."
-                completion(false)
             }
         }
     }
@@ -186,39 +215,53 @@ class AuthViewModel: ObservableObject {
             return
         }
         
-        if users.contains(where: { $0.email == email }) {
-            errorMessage = "이미 사용 중인 이메일입니다."
-            completion(false)
-            return
-        }
-        
         isLoading = true
         errorMessage = ""
         
-        // 테스트를 위한 지연 시뮬레이터
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        // 추가: Firebase 회원가입 로직
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] (authResult, error) in
             guard let self = self else { return }
             
-            self.isLoading = false
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    self.errorMessage = self.handleFirebaseError(error)
+                    completion(false)
+                }
+                return
+            }
             
-            let newUser = User(
-                id: UUID().uuidString,
-                username: self.username,
-                email: self.email,
-                profileImageURL: nil,
-                createdAt: Date(),
-                password: self.password
-            )
+            guard let user = authResult?.user else {
+                DispatchQueue.amin.async {
+                    self.isLoading = false
+                    self.errorMessage = "계정 생성 중 오류가 발생했습니다."
+                    completion(false)
+                }
+                return
+            }
             
-            self.users.append(newUser)
+            // Firestore에 사용자 정보 저장
+            let db = Firestore.firestore()
+            let userData: [String: Any] = [
+                "username": self.username,
+                "email": self.email,
+                "createdAt": Timestamp(date: Date()),
+                "likedPostIDs": []
+            ]
             
-            self.currentUser = newUser
-            self.isAuthenticated = true
-            
-            self.resetFields()
-            
-            completion(true)
+            db.collection("users").document(user.uid).setData(userData) { error in
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    
+                    if let error = error {
+                        print("Firestore 사용자 저장 오류: \(error.localizedDescription)")
+                        self.errorMessage = "
+                    }
+                }
+            }
         }
+        
+        
     }
     
     // 소셜 로그인 함수
