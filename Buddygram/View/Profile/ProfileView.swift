@@ -9,6 +9,11 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var showingDeleteConfirmation = false
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
+    @State private var showingReauthDialog = false
+    @State private var reauthPassword = ""
     
     var body: some View {
         VStack (spacing: 20) {
@@ -36,8 +41,22 @@ struct ProfileView: View {
                     .cornerRadius(10)
             }
             .padding(.top, 20)
+            
+            // 회원탈퇴 버튼 추가
+            Button(action: {
+                showingDeleteConfirmation = true
+            }) {
+                Text("회원탈퇴")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                    .frame(width: 200, height: 100)
+                    .background(Color.red)
+                    .cornerRadius(10)
+            }
+            .padding(.top, 20)
         }
         .padding()
+        .alert(")
     }
 }
 
