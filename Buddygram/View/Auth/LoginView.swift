@@ -25,14 +25,14 @@ struct LoginView: View {
                 
                 // 이메일 & 비밀번호 텍스트필드
                 VStack(spacing: 12) {
-                    TextField("Email (test@test.com)", text: $authViewModel.email)
+                    TextField("Email", text: $authViewModel.email)
                         .modifier(CustomSignTextFieldModifier())
                     
                     HStack(spacing: 0) {
                         if isPasswordVisible {
-                            TextField("Password (Qwer12!@)", text: $authViewModel.password)
+                            TextField("Password", text: $authViewModel.password)
                         } else {
-                            SecureField("Password (Qwer12!@)", text: $authViewModel.password)
+                            SecureField("Password", text: $authViewModel.password)
                         }
                         
                         Button(action: {

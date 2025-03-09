@@ -232,7 +232,7 @@ class AuthViewModel: ObservableObject {
             }
             
             guard let user = authResult?.user else {
-                DispatchQueue.amin.async {
+                DispatchQueue.main.async {
                     self.isLoading = false
                     self.errorMessage = "계정 생성 중 오류가 발생했습니다."
                     completion(false)
@@ -255,13 +255,21 @@ class AuthViewModel: ObservableObject {
                     
                     if let error = error {
                         print("Firestore 사용자 저장 오류: \(error.localizedDescription)")
-                        self.errorMessage = "
+                        self.errorMessage = "사용자 정보 저장 중 오류가 발생했습니다."
+                        
+                        // Firestore 저장 실패 시 계정 삭제
+                        user.delete { _ in }
+                        
+                        completion(false)
+                        return
                     }
+                    
+                    // 회원가입 성공 후 필드 초기화
+                    self.resetFields()
+                    completion(true)
                 }
             }
         }
-        
-        
     }
     
     // 소셜 로그인 함수
@@ -269,33 +277,26 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = ""
         
-        // 테스트를 위한 지연 시뮬레이션
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+        errorMessage = "소셜 로그인은 아직 구현되지 않았습니다."
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
-            
             self.isLoading = false
-            
-            // 테스트용 사용자
-            let socialUser = User(
-                id: UUID().uuidString,
-                username: "\(provider)User",
-                email: "\(provider)@example.com",
-                profileImageURL: nil,
-                createdAt: Date(),
-                password: ""
-            )
-            
-            self.currentUser = socialUser
-            self.isAuthenticated = true
-            completion(true)
+            completion(false)
         }
     }
     
+    
     // SignOut 로그아웃
     func signOut() {
-        currentUser = nil
-        isAuthenticated = false
-        resetFields()
+        // 추가: Firebase 로그아웃 로직
+        do {
+            try Auth.auth().signOut()
+            resetFields()
+        } catch {
+            print("로그아웃 오류: \(error.localizedDescription)")
+        }
+        
     }
     
     func resetFields() {
@@ -305,5 +306,34 @@ class AuthViewModel: ObservableObject {
         confirmPassword = ""
         agreeToTerms = false
         errorMessage = ""
+    }
+    
+    
+    // 추가: Firebase 오류 메시지 처리 함수
+    private func handleFirebaseError(_ error: Error) -> String {
+        let errorCode = (error as NSError).code
+        
+        switch errorCode {
+        case AuthErrorCode.wrongPassword.rawValue:
+            return "이메일 또는 비밀번호가 올바르지 않습니다."
+        case AuthErrorCode.invalidEmail.rawValue:
+            return "올바르지 않은 이메일 형식입니다."
+        case AuthErrorCode.accountExistsWithDifferentCredential.rawValue:
+            return "같은 이메일의 다른 계정이 이미 존재합니다."
+        case AuthErrorCode.emailAlreadyInUse.rawValue:
+            return "이미 사용 중인 이메일입니다."
+        case AuthErrorCode.userNotFound.rawValue:
+            return "이메일 또는 비밀번호가 올바르지 않습니다."
+        case AuthErrorCode.networkError.rawValue:
+            return "네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요."
+        case AuthErrorCode.weakPassword.rawValue:
+            return "비밀번호가 너무 약합니다."
+        case AuthErrorCode.userDisabled.rawValue:
+            return "해당 계정은 비활성화되었습니다."
+        case AuthErrorCode.tooManyRequests.rawValue:
+            return "너무 많은 요청이 발생했습니다. 나중에 다시 시도해주세요."
+        default:
+            return "로그인에 실패했습니다: \(error.localizedDescription)"
+        }
     }
 }
