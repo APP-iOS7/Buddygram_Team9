@@ -56,9 +56,46 @@ struct ProfileView: View {
             .padding(.top, 20)
         }
         .padding()
-        .alert(")
+        // 회원 탈퇴시 확인 알림창
+        .alert("정말 탈퇴하시겠습니까?", isPresented: $showingDeleteConfirmation) {
+            Button("취소", role: .cancel) {}
+            Button("탈퇴", role: .destructive) {
+                deleteAccount()
+            }
+        } message: {
+            Text("모든 데이터가 삭제되며, 이 작업은 되돌릴 수 없습니다.")
+        }
+        // 오류 알림창
+        .alert("오류", isPresented: $showingErrorAlert) {
+            if errorMessage == "보안상의 이유로 재로그인이 필요합니다." {
+                Button("재인증", role: .none) {
+                    showingReauthDialog = true
+                }
+                Button("취소", role: .cancel) {}
+            } else {
+                Button("확인", role: .cancel) {}
+            }
+        } message: {
+            Text(errorMessage)
+        }
+        // 재인증 다이얼로그
+        .sheet(isPresented: $showingReauthDialog) {
+            ReauthenticationView()
+        }
     }
+    
+    // 회원탈퇴 함수
+    private func deleteAccount() {
+        authViewModel.deleteAccount { success, message in
+            if !success, let message = message {
+                errorMessage = message
+                showingErrorAlert = true
+            }
+        }
+    }
+    
 }
+
 
 #Preview {
     ProfileView()
