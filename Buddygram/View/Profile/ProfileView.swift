@@ -44,7 +44,7 @@ struct ProfileView: View {
             
             // 회원탈퇴 버튼 추가
             Button(action: {
-                showingDeleteConfirmation = true
+                showingPasswordDialog = true
                 deletePassword = ""
             }) {
                 Text("회원탈퇴")
@@ -77,6 +77,13 @@ struct ProfileView: View {
             }
         } message: {
             Text("모든 데이터가 삭제되며, 이 작업은 되돌릴 수 없습니다.")
+        }
+        
+        // 오류 알림창
+        .alert("오류", isPresented: $showingErrorAlert) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
     }
     
