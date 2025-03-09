@@ -38,7 +38,7 @@ struct ContentView: View {
                         .tag(1)
                     
                     // 업로드
-                    UploadView()
+                    UploadView(selectedTab: $selectedTab)
                         .tabItem {
                             Image(systemName: "plus.square.fill")
                         }

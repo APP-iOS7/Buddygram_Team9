@@ -8,6 +8,8 @@
 import Foundation
 import SwiftUI
 import Firebase
+import FirebaseAuth
+import FirebaseFirestore
 import Combine
 
 class AuthViewModel: ObservableObject {
@@ -29,22 +31,35 @@ class AuthViewModel: ObservableObject {
     @Published var isPasswordValid: Bool = false
     @Published var isUsernameValid = false
     
-    // Firebase 연결전 로컬 시뮬레이션용 테스트 기본 사용자
-    private var users: [User] = [
-        User(id: UUID().uuidString,
-             username: "test",
-             email: "test@test.com",
-             profileImageURL: nil,
-             createdAt: Date(),
-             password: "Qwer12!@")
-    ]
-    
-    
     private var cancellables = Set<AnyCancellable>()
+    private var handle: AuthStateDidChangeListenerHandle?
     
     init() {
         setupValidations()
+        setupAuthStateListener()
     }
+    
+    // 추가 : Fire
+    deinit {
+        if let handle = handle {
+            Auth.auth().removeStateDidChangeListener(handle)
+        }
+    }
+    
+    private func setupAuthStateListener() {
+        handle = Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
+            guard let self = self else { return }
+            
+            if let firebaseUser = user {
+                self.fetchUserData(uid: firebaseUser.uid)
+            } else {
+                self.isAuthenticated = false
+                self.currentUser = nil
+            }
+        }
+    }
+    
+    
     
     // 이메일, 패스워드 유효성 검사 설정
     private func setupValidations() {

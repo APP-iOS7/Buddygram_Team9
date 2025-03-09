@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 import Firebase
+import FirebaseFirestore
 
 struct User: Identifiable, Codable {
 
@@ -18,5 +19,18 @@ struct User: Identifiable, Codable {
     var profileImageURL: String?
     var createdAt: Date
     var likedPostIDs: [String] = []
-    var password: String // 로컬 테스트용, Firebase 사용 시 제거
+    
+    // 추가 : Firebase
+    static func fromFirebasestore(document: DocumentSnapshot) -> User? {
+        guard let data = document.data() else { return nil }
+        
+        return User(
+            id: document.documentID,
+            username: data["username"] as? String ?? "",
+            email: data["email"] as? String ?? "",
+            profileImageURL: data["profileImageURL"] as? String,
+            createdAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
+            likedPostIDs: data["likePostIDs"] as? [String] ?? []
+        )
+    }
 }
