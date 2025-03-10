@@ -246,7 +246,8 @@ class AuthViewModel: ObservableObject {
                 "username": self.username,
                 "email": self.email,
                 "createdAt": Timestamp(date: Date()),
-                "likedPostIDs": []
+                "likedPostIDs": [],
+                "firstLogin": true // 추가: 첫 로그인 상태 추가 -> HomeView 첫 환영 게시물 
             ]
             
             db.collection("users").document(user.uid).setData(userData) { error in

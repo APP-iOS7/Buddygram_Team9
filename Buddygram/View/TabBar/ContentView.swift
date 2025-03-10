@@ -7,24 +7,23 @@
 
 import SwiftUI
 import SwiftData
+import Firebase
+import FirebaseAuth
+import FirebaseFirestore
+import Kingfisher
 
 struct ContentView: View {
     @State private var selectedTab = 0
-
-    @State private var posts: [FeedPost] = [
-        FeedPost(username: "user1", image: "post1", isLiked: false),
-        FeedPost(username: "user2", image: "post2", isLiked: false),
-        FeedPost(username: "user3", image: "post3", isLiked: false)
-    ]
-            
+    
     @StateObject private var authViewModel = AuthViewModel()
+    @StateObject private var postViewModel = PostViewModel()
     
     var body: some View {
         Group {
             if authViewModel.isAuthenticated {
                 TabView(selection: $selectedTab) {
                     // 홈
-                    HomeView(posts: $posts)
+                    HomeView(selectedTab: $selectedTab)
                         .tabItem {
                             Image(systemName: "house.fill")
                         }
@@ -46,7 +45,7 @@ struct ContentView: View {
                     
                     
                     // 좋아요
-                    LikeView(posts: $posts)
+                    LikeView(selectedTab: $selectedTab)
                         .tabItem {
                             Image(systemName: "heart.fill")
                         }
@@ -60,16 +59,25 @@ struct ContentView: View {
                         }
                         .tag(4)
                 }
-               
+                
             } else {
                 LoginView()
             }
         }
         .environmentObject(authViewModel)
-        .onChange(of: authViewModel.isAuthenticated) {
-            if !authViewModel.isAuthenticated {
+        .environmentObject(postViewModel)
+        .onChange(of: authViewModel.isAuthenticated) { oldValue, newValue in
+            if !newValue {
                 selectedTab = 0
+            } else if newValue && oldValue == false {
+                postViewModel.fetchAllPosts()
             }
+        }
+        .onAppear {
+            // Kingfisher 이미지 캐시 설정
+            let cache = ImageCache.default
+            cache.memoryStorage.config.totalCostLimit = 100 * 1024 * 1024
+            cache.diskStorage.config.sizeLimit = 300 * 1024 * 1024
         }
     }
     
