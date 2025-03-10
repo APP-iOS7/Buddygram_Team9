@@ -17,12 +17,6 @@ struct LoginView: View {
         NavigationView {
             VStack(spacing: 0) {
                 
-                Text("Buddygram")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(Color("TextColor"))
-                    .padding(.top, 20)
-                    .padding(.bottom, 12)
-                
                 // 이메일 & 비밀번호 텍스트필드
                 VStack(spacing: 12) {
                     TextField("Email", text: $authViewModel.email)

@@ -200,7 +200,7 @@ struct UploadView: View {
                 }
             }
             .padding()
-            .disabled(postImage == nil || isUploading)
+            .disabled(postImage == nil && caption.isEmpty || isUploading)
         }
         .sheet(isPresented: $showCamera) {
             ImagePicker(image: $uiImage, sourceType: .camera)
@@ -306,27 +306,30 @@ struct UploadView: View {
             return
         }
         
-        guard let uiImage = uiImage else {
+        guard uiImage != nil || !caption.isEmpty else {
             alertTitle = "오류"
-            alertMessage = "이미지를 선택해주세요."
+            alertMessage = "이미지나 텍스트 중 하나는 선택해주세요."
             showAlert = true
             return
         }
         
         isUploading = true
         
-        postViewModel.uploadPost(image: uiImage, caption: caption, user: currentUser) { success in
-            isUploading = false
+        // 이미지가 없는 경우 기본 이미지(텍스트 아이콘) 사용
+        let imageToUpload = uiImage ?? (UIImage(systemName: "text.below.photo") ?? UIImage())
+        
+        postViewModel.uploadPost(image: imageToUpload, caption: caption, user: currentUser) { success in
+            self.isUploading = false
             
             if success {
-                alertTitle = "업로드 완료"
-                alertMessage = "게시물이 성공적으로 업로드되었습니다."
-                showAlert = true
-                resetUploadState()
+                self.alertTitle = "업로드 완료"
+                self.alertMessage = "게시물이 성공적으로 업로드되었습니다."
+                self.showAlert = true
+                self.resetUploadState()
             } else {
-                alertTitle = "오류"
-                alertMessage = postViewModel.errorMessage.isEmpty ? "게시물 업로드 중 오류가 발생했습니다." : postViewModel.errorMessage
-                showAlert = true
+                self.alertTitle = "오류"
+                self.alertMessage = self.postViewModel.errorMessage.isEmpty ? "게시물 업로드 중 오류가 발생했습니다." : self.postViewModel.errorMessage
+                self.showAlert = true
             }
         }
     }
