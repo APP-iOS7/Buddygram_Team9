@@ -79,7 +79,8 @@ class AuthViewModel: ObservableObject {
                     email: userData["email"] as? String ?? "",
                     profileImageURL: userData["profileImageURL"] as? String,
                     createdAt: (userData["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
-                    likedPostIDs: userData["likedPostIDs"] as? [String] ?? []
+                    likedPostIDs: userData["likedPostIDs"] as? [String] ?? [],
+                    postCount: userData["postCount"] as? Int ?? 0 // 추가
                 )
                 
                 DispatchQueue.main.async {
