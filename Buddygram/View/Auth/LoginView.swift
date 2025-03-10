@@ -140,7 +140,7 @@ struct LoginView: View {
                         .font(.largeTitle) // ✅ 크기 키우기
                         .fontWeight(.bold)
                         .foregroundStyle(LinearGradient(
-                            gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
+                            gradient: Gradient(colors: [Color.green,Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
                             startPoint: .leading,
                             endPoint: .trailing
                         ))

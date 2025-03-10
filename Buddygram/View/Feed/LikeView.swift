@@ -44,7 +44,7 @@ struct LikeView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundStyle(LinearGradient(
-                                gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
+                                gradient: Gradient(colors: [Color.green, Color.green,Color.green, Color.pink, Color.pink, Color.purple]),
                                 startPoint: .leading,
                                 endPoint: .trailing
                             ))
