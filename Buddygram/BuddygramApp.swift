@@ -8,15 +8,16 @@
 import SwiftUI
 import SwiftData
 import FirebaseCore
+import FirebaseFirestore
 
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-
-    return true
-  }
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        
+        return true
+    }
 }
 
 
@@ -27,7 +28,7 @@ struct BuddygramApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([ TempModel.self, ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
@@ -51,7 +52,7 @@ struct BuddygramApp: App {
 class TempModel {
     var id: UUID
     var name: String
-
+    
     init(id: UUID = UUID(), name: String) {
         self.id = id
         self.name = name

@@ -151,6 +151,9 @@ struct FirebasePostView: View {
             HStack(spacing: 20) {
                 // 좋아요 버튼
                 Button(action: {
+                    if !postViewModel.isLoading {
+                        toggleLike() // 버그 해결 중 1. 좋아요 버튼                        
+                    }
                     withAnimation(.easeInOut(duration: 0.3)) {
                         animateLike = isLiked
                     }
@@ -245,6 +248,7 @@ struct FirebasePostView: View {
     private func toggleLike() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
+        print("좋아요 토글 시작 - 게시물 ID: \(post.id), 사용자 ID: \(userId)")
         isLiked.toggle()
         
         postViewModel.toggleLike(postId: post.id, userId: userId) { success in

@@ -219,6 +219,7 @@ class PostViewModel: ObservableObject {
     
     // 좋아요 버튼
     func toggleLike(postId: String, userId: String, completion: @escaping (Bool) -> Void = {_ in}) {
+        
         let postRef = db.collection("posts").document(postId)
         
         db.runTransaction({ (transaction, errorPointer) -> Any? in

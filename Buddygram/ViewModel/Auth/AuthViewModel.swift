@@ -10,6 +10,7 @@ import SwiftUI
 import Firebase
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseStorage
 import Combine
 
 class AuthViewModel: ObservableObject {
@@ -334,26 +335,100 @@ class AuthViewModel: ObservableObject {
             }
             
             let db = Firestore.firestore()
-            db.collection("users").document(currentUser.uid).delete { [weak self] error in
+            
+            // 1. 사용자의 모든 게시물을 가져옴
+            db.collection("posts").whereField("ownerUid", isEqualTo: currentUser.uid).getDocuments { [weak self] (snapshot, error) in
                 guard let self = self else { return }
                 
                 if let error = error {
-                    print("Firestore 사용자 데이터 삭제 오류: \(error.localizedDescription)")
+                    print("사용자 게시물 조회 오류: \(error.localizedDescription)")
+                    self.deleteUserAndFinish(currentUser: currentUser, db: db, completion: completion)
+                    return
                 }
                 
-                currentUser.delete { [weak self] error in
-                    self?.isLoading = false
-                    
-                    if let error = error {
-                        completion(false, "계정 삭제 중 오류가 발생했습니다.: \(error.localizedDescription)")
-                        return
-                    }
-                    
-                    self?.currentUser = nil
-                    self?.isAuthenticated = false
-                    self?.resetFields()
-                    completion(true, nil)
+                guard let documents = snapshot?.documents, !documents.isEmpty else {
+                    // 게시물이 없으면 바로 사용자 삭제 진행
+                    self.deleteUserAndFinish(currentUser: currentUser, db: db, completion: completion)
+                    return
                 }
+                
+                let storage = Storage.storage().reference()
+                let group = DispatchGroup()
+                
+                // 2. 각 게시물에 대해 Storage의 이미지와 Firestore 문서 삭제
+                for document in documents {
+                    group.enter()
+                    
+                    // 게시물 데이터 가져오기
+                    let data = document.data()
+                    let postId = document.documentID
+                    
+                    // Firestore에서 게시물 문서 삭제
+                    db.collection("posts").document(postId).delete { error in
+                        if let error = error {
+                            print("게시물 삭제 오류 (ID: \(postId)): \(error.localizedDescription)")
+                        } else {
+                            print("게시물 삭제 성공 (ID: \(postId))")
+                        }
+                        
+                        // 이미지가 있으면 Storage에서도 삭제
+                        if let imageURL = data["imageURL"] as? String, imageURL.contains("post_images/") {
+                            if let imagePathStart = imageURL.range(of: "post_images/")?.upperBound {
+                                let imagePath = String(imageURL[imagePathStart...])
+                                
+                                // 가능하면 URL에서 파일명 추출
+                                let filename = imagePath.components(separatedBy: "?").first ?? imagePath
+                                
+                                let storageRef = storage.child("post_images/\(filename)")
+                                
+                                storageRef.delete { error in
+                                    if let error = error {
+                                        print("게시물 이미지 삭제 오류: \(error.localizedDescription)")
+                                    } else {
+                                        print("게시물 이미지 삭제 성공")
+                                    }
+                                    group.leave()
+                                }
+                            } else {
+                                group.leave()
+                            }
+                        } else {
+                            group.leave()
+                        }
+                    }
+                }
+                
+                // 3. 모든 게시물 삭제 완료 후 사용자 삭제 진행
+                group.notify(queue: .main) {
+                    self.deleteUserAndFinish(currentUser: currentUser, db: db, completion: completion)
+                }
+            }
+        }
+    }
+
+    // 사용자 계정과 데이터 삭제 후 완료 처리하는 보조 함수
+    private func deleteUserAndFinish(currentUser: FirebaseAuth.User, db: Firestore, completion: @escaping (Bool, String?) -> Void) {
+        // Firestore에서 사용자 문서 삭제
+        db.collection("users").document(currentUser.uid).delete { [weak self] error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Firestore 사용자 데이터 삭제 오류: \(error.localizedDescription)")
+            }
+            
+            // Firebase Auth에서 사용자 계정 삭제
+            currentUser.delete { [weak self] (error) in
+                self?.isLoading = false
+                
+                if let error = error {
+                    completion(false, "계정 삭제 중 오류가 발생했습니다.: \(error.localizedDescription)")
+                    return
+                }
+                
+                self?.currentUser = nil
+                self?.isAuthenticated = false
+                self?.resetFields()
+                completion(true, nil)
             }
         }
     }
