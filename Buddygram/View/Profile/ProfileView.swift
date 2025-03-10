@@ -132,27 +132,6 @@ struct ProfileView: View {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
                                 .padding(50)
-                        } else if userPosts.isEmpty {
-                            // 게시물이 없는 경우
-                            VStack(spacing: 12) {
-                                Text("아직 게시물이 없습니다")
-                                    .font(.headline)
-                                    .foregroundColor(.gray)
-                                    .padding(.top, 30)
-                                
-                                Button(action: {
-                                    selectedTab = 2 // 업로드 탭으로 이동
-                                }) {
-                                    Text("첫 게시물 업로드하기")
-                                        .font(.system(size: btnFontSize, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .frame(width: 200, height: btnHeight)
-                                        .background(Color("PrimaryButtonColor"))
-                                        .cornerRadius(btnCornerRadius)
-                                }
-                                .padding(.top, 10)
-                            }
-                            .padding(.top, 20)
                         } else {
                             // 게시물 그리드
                             VStack(alignment: .leading) {
@@ -162,9 +141,10 @@ struct ProfileView: View {
                                     .padding(.top)
                                 
                                 LazyVGrid(columns: columns, spacing: 2) {
-                                    ForEach(userPosts) { post in
+                                    ForEach(postViewModel.posts.filter { $0.ownerUid == user.id }) { post in
                                         NavigationLink(destination: PostDetailView(post: post)) {
                                             PostGridItem(post: post)
+                                                .frame(width: 120, height: 120)
                                         }
                                     }
                                 }
@@ -209,11 +189,13 @@ struct ProfileView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("프로필")
-            .refreshable {
-                await fetchUserPosts()
-            }
             .onAppear {
                 fetchUserPosts()
+            }
+            .onChange(of: selectedTab) { _, newValue in
+                if newValue == 4 {
+                    fetchUserPosts()
+                }
             }
             
             // 비밀번호 입력 다이어로그
@@ -244,36 +226,15 @@ struct ProfileView: View {
                 Text(errorMessage)
             }
             
-            .onChange(of: selectedTab) { _, newValue in
-                if newValue == 4 {
-                    fetchUserPosts()
-                }
-            }
         }
     }
     
-    // 사용자 게시물 가져오기
-    private func fetchUserPosts() async {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        isLoading = true
-        
-        await withCheckedContinuation { continuation in
-            postViewModel.fetchUserPosts(uid: uid) { posts in
-                self.userPosts = posts
-                self.isLoading = false
-                continuation.resume()
-            }
-        }
-    }
-    
-    // 동기 버전 - onAppear에서 호출
     private func fetchUserPosts() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isLoading = true
         
         postViewModel.fetchUserPosts(uid: uid) { posts in
             self.userPosts = posts
-            self.userPostCount = posts.count
             self.isLoading = false
         }
     }
@@ -442,10 +403,3 @@ struct PasswordInputView: View {
     }
 }
 
-
-
-#Preview {
-    ProfileView(selectedTab: .constant(4))
-        .environmentObject(AuthViewModel())
-        .environmentObject(PostViewModel())
-}
