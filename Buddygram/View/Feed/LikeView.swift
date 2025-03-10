@@ -21,14 +21,17 @@ struct LikeView: View {
                     .edgesIgnoringSafeArea(.all)
                 
                 ScrollView {
-                    VStack(spacing: 20) {
-                        Text("❤️")
+                    LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
+                        Section(header: Text("❤️ 좋아요한 게시물")
                             .font(.title3)
                             .fontWeight(.bold)
-                            .padding(.leading)
-                        
-                        ForEach(likedPosts) { post in
-                            LikedPostView(post: post)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                        ) {
+                            ForEach(likedPosts) { post in
+                                LikedPostView(post: post)
+                            }
                         }
                     }
                     .padding()
