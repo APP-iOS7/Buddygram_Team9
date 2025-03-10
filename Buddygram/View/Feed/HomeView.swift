@@ -28,11 +28,11 @@ struct HomeView: View {
                     }
                 }
                 
-               if postViewModel.isLoading && !isRefreshing {
+              /* if postViewModel.isLoading && !isRefreshing {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
                         .padding(.top, 50)
-                } else {
+                } else {*/
                     // Firebase에서 가져온 Post 모델을 사용하여 게시물 표시
                     LazyVStack(spacing: 20) {
                         ForEach(postViewModel.posts) { post in
@@ -40,7 +40,7 @@ struct HomeView: View {
                         }
                     }
                     .padding()
-                }
+                //}
             }
             .navigationBarTitleDisplayMode(.inline)
             .refreshable {
@@ -82,7 +82,8 @@ struct FirebasePostView: View {
     
     init(post: Post) {
         self.post = post
-        self._isLiked = State(initialValue: post.likedBy.contains(Auth.auth().currentUser?.uid ?? ""))
+        let currentUserId = Auth.auth().currentUser?.uid ?? ""
+        self._isLiked = State(initialValue: post.likedBy.contains(currentUserId))
     }
     
     var body: some View {
