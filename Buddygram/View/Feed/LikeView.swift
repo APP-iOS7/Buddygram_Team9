@@ -16,25 +16,32 @@ struct LikeView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    ForEach(likedPosts) { post in
-                        LikedPostView(post: post)
+            ZStack {
+                Color(.systemGray6)
+                    .edgesIgnoringSafeArea(.all)
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        ForEach(likedPosts) { post in
+                            LikedPostView(post: post)
+                        }
                     }
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle("❤️ 좋아요한 게시물")
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Buddygram")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundStyle(LinearGradient(
-                            gradient: Gradient(colors: [Color.green, Color.yellow, Color.purple, Color.pink]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ))
+                    VStack {
+                        Text("Buddygram")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundStyle(LinearGradient(
+                                gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ))
+                    }
                 }
             }
         }
@@ -47,8 +54,15 @@ struct LikedPostView: View {
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(.gray)
+                
                 Text(post.username)
                     .font(.headline)
+                    .fontWeight(.semibold)
+
                 Spacer()
             }
             .padding(.horizontal)
