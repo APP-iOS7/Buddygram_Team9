@@ -27,7 +27,7 @@ struct LikeView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color(.systemGray6) // UI에서 가져온 배경색
+                Color(.systemGray6)
                     .edgesIgnoringSafeArea(.all)
                 
                 ScrollView {
@@ -133,7 +133,7 @@ struct LikedPostView: View {
                     
                     Text(post.ownerUsername)
                         .font(.headline)
-                        .fontWeight(.semibold) // UI에서 가져온 스타일
+                        .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
                     Spacer()
@@ -158,7 +158,7 @@ struct LikedPostView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(height: 300)
                         .clipped()
-                        .cornerRadius(10) // UI에서 가져온 스타일
+                        .cornerRadius(10)
                 } else {
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))
@@ -168,7 +168,7 @@ struct LikedPostView: View {
                                 .font(.largeTitle)
                                 .foregroundColor(.gray)
                         )
-                        .cornerRadius(10) // UI에서 가져온 스타일
+                        .cornerRadius(10)
                 }
                 
                 // 캡션 (간단히 표시)
