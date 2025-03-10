@@ -253,6 +253,14 @@ struct UploadView: View {
                 }
             )
         }
+        .onDisappear {
+            resetUploadState()
+        }
+        .onChange(of: selectedTab) { oldValue, newValue in
+            if oldValue == 2 && newValue != 2 {
+                resetUploadState()
+            }
+        }
     }
     
     // 카메라 권한 확인 함수
