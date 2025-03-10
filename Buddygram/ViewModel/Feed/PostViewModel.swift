@@ -261,4 +261,10 @@ class PostViewModel: ObservableObject {
             }
         }
     }
+    
+    // 추가: 마이페이지뷰 (Profile View) 게시물 삭제 함수 추가
+    func deletePost() {
+        
+    }
+    
 }

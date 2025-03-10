@@ -11,7 +11,14 @@ import FirebaseFirestore
 
 struct ProfileView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var postViewModel: PostViewModel
+    
     @Binding var selectedTab: Int
+    
+    @State private var userPosts: [Post] = []
+    @State private var isLoading = false
+    @State private var isRefreshing = false
+    
     @State private var showingPasswordDialog = false
     @State private var showingDeleteConfirmation = false
     @State private var showingErrorAlert = false
