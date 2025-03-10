@@ -7,11 +7,14 @@
 
 import SwiftUI
 import SwiftData
+import Firebase
+import FirebaseAuth
+import FirebaseFirestore
 import Kingfisher
 
 struct ContentView: View {
     @State private var selectedTab = 0
-            
+    
     @StateObject private var authViewModel = AuthViewModel()
     @StateObject private var postViewModel = PostViewModel()
     
@@ -56,7 +59,7 @@ struct ContentView: View {
                         }
                         .tag(4)
                 }
-               
+                
             } else {
                 LoginView()
             }
@@ -70,7 +73,20 @@ struct ContentView: View {
                 postViewModel.fetchAllPosts()
                 
                 if let user = authViewModel.currentUser {
-                    postViewModel.createWelcomePost(for: user)
+                    let db = Firestore.firestore()
+                    db.collection("users").document(user.id).getDocument { (document, error) in
+                        if let document = document, document.exists {
+                            let data = document.data()
+                            
+                            if data?["firstLogin"] as? Bool != false {
+                                postViewModel.createWelcomePost(for: user)
+                                
+                                db.collection("users").document(user.id).updateData(["firstLogin": false])
+                            }
+                        }
+                        
+                    }
+                    
                 }
             }
         }
