@@ -11,7 +11,6 @@
 		1ECFAE832D793351005809D4 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1ECFAE822D793351005809D4 /* FirebaseCore */; };
 		1ECFAE852D793351005809D4 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 1ECFAE842D793351005809D4 /* FirebaseFirestore */; };
 		1ECFAE872D793351005809D4 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 1ECFAE862D793351005809D4 /* FirebaseStorage */; };
-		1EDD96142D7EB1AE0086D2F6 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 1EDD96132D7EB1AE0086D2F6 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,7 +34,6 @@
 				1ECFAE872D793351005809D4 /* FirebaseStorage in Frameworks */,
 				1ECFAE812D793351005809D4 /* FirebaseAuth in Frameworks */,
 				1ECFAE852D793351005809D4 /* FirebaseFirestore in Frameworks */,
-				1EDD96142D7EB1AE0086D2F6 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,7 +80,6 @@
 				1ECFAE822D793351005809D4 /* FirebaseCore */,
 				1ECFAE842D793351005809D4 /* FirebaseFirestore */,
 				1ECFAE862D793351005809D4 /* FirebaseStorage */,
-				1EDD96132D7EB1AE0086D2F6 /* Kingfisher */,
 			);
 			productName = Buddygram;
 			productReference = 1ECFAE6A2D793208005809D4 /* Buddygram.app */;
@@ -114,7 +111,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				1ECFAE7F2D793351005809D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				1EDD96122D7EB1AE0086D2F6 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1ECFAE6B2D793208005809D4 /* Products */;
@@ -274,7 +270,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Buddygram/Preview Content\"";
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_TEAM = DSCZV7Y3T7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "이 앱은 사진 업로드를 위해 카메라 접근이 필요합니다.";
@@ -306,7 +302,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Buddygram/Preview Content\"";
-				DEVELOPMENT_TEAM = 59FP2PXRXK;
+				DEVELOPMENT_TEAM = DSCZV7Y3T7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "이 앱은 사진 업로드를 위해 카메라 접근이 필요합니다.";
@@ -362,14 +358,6 @@
 				minimumVersion = 11.9.0;
 			};
 		};
-		1EDD96122D7EB1AE0086D2F6 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.3.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -392,11 +380,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1ECFAE7F2D793351005809D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
-		};
-		1EDD96132D7EB1AE0086D2F6 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1EDD96122D7EB1AE0086D2F6 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
