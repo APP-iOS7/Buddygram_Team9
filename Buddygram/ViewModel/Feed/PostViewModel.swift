@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Firebase
+import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 import UIKit
@@ -83,7 +84,7 @@ class PostViewModel: ObservableObject {
             .whereField("ownerUid", isEqualTo: uid)
             .order(by: "createdAt", descending: true)
             .getDocuments { [weak self] (snapshot, error) in
-                guard let self = self else { return }
+                guard let self = self else { return completion([]) }
                 
                 self.isLoading = false
                 
@@ -206,6 +207,14 @@ class PostViewModel: ObservableObject {
                 }
             }
         }
+        
+        db.collection("users").document(user.id).updateData([
+            "postCount": FieldValue.increment(Int64(1))
+        ]) { error in
+            if let error = error {
+                print("postCount 업데이트 실패: \(error.localizedDescription)")
+            }
+        }
     }
     
     // 좋아요 버튼
@@ -229,7 +238,9 @@ class PostViewModel: ObservableObject {
             var likedBy = post["likedBy"] as? [String] ?? []
             var likeCount = post["likeCount"] as? Int ?? 0
             
-            if likedBy.contains(userId) {
+            let isCurrentlyLiked = likedBy.contains(userId)
+            
+            if isCurrentlyLiked {
                 // 좋아요 취소
                 likedBy.removeAll { $0 == userId }
                 likeCount = max(0, likeCount - 1)
@@ -246,7 +257,7 @@ class PostViewModel: ObservableObject {
             
             return [
                 "success": true,
-                "liked": likedBy.contains(userId)
+                "liked": !isCurrentlyLiked
             ]
         }) { [weak self] (result, error) in
             if let error = error {
@@ -258,6 +269,80 @@ class PostViewModel: ObservableObject {
             // 게시물 목록 새로고침
             self?.fetchAllPosts {
                 completion(true)
+            }
+        }
+    }
+    
+    // 추가: 마이페이지뷰 (Profile View) 게시물 삭제 함수 추가
+    func deletePost(postId: String, completion: @escaping (Bool) -> Void = {_ in}) {
+        isLoading = true
+        errorMessage = ""
+        
+        let postRef = db.collection("posts").document(postId)
+        
+        postRef.getDocument { [weak self] (document, error) in
+            guard let self = self else { return completion(false) }
+            
+            if let error = error {
+                self.isLoading = false
+                self.errorMessage = "게시물 정보를 가져오는 중 오류가 발생했습니다.: \(error.localizedDescription)"
+                completion(false)
+                return
+            }
+            
+            guard let document = document, document.exists,
+                  let data = document.data(),
+                  let imageURL = data["imageURL"] as? String else {
+                self.isLoading = false
+                self.errorMessage = "게시물 정보가 유효하지 않습니다."
+                completion(false)
+                return
+            }
+            
+            // Firestore 게시물 삭제
+            postRef.delete { [weak self] error in
+                guard let self = self else { return completion(false) }
+                
+                if let error = error {
+                    self.isLoading = false
+                    self.errorMessage = "게시물 삭제 중 오류가 발생했습니다: \(error.localizedDescription)"
+                    completion(false)
+                    return
+                }
+                
+                // Storage 이미지 삭제
+                if let imagePathStart = imageURL.range(of: "post_images/")?.upperBound {
+                    let imagePath = String(imageURL[imagePathStart...])
+                    let storageRef = self.storage.child("post_images/\(imagePath)")
+                    
+                    storageRef.delete { error in
+                        if let error = error {
+                            print("이미지 삭제 중 오류 발생: \(error.localizedDescription)")
+                        }
+                    }
+                    
+                    self.fetchAllPosts {
+                        self.isLoading = false
+                        completion(true)
+                    }
+                    
+                } else {
+                    self.fetchAllPosts {
+                        self.isLoading = false
+                        completion(true)
+                    }
+                }
+            }
+        }
+        // 게시물 삭제 후 사용자의 postCount 감소
+        if let currentUser = Auth.auth().currentUser {
+            let userRef = db.collection("users").document(currentUser.uid)
+            userRef.updateData([
+                "postCount": FieldValue.increment(Int64(-1))
+            ]) { error in
+                if let error = error {
+                    print("postCount 감소 실패: \(error.localizedDescription)")
+                }
             }
         }
     }
