@@ -16,7 +16,7 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                Spacer()
+//                Spacer()
                 
                 // 이메일 & 비밀번호 텍스트필드
                 VStack(spacing: 12) {
@@ -124,6 +124,25 @@ struct LoginView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 20)
                 
+                .padding(.horizontal)
+                                .padding(.vertical, 20)
+                                .toolbar {
+                                        ToolbarItem(placement: .principal) {
+                                            Text("Buddygram")
+                                                .font(.largeTitle)
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(
+                                                    LinearGradient(
+                                                        gradient: Gradient(colors: [
+                                                            Color.green, Color.green, Color.green,
+                                                            Color.pink, Color.pink, Color.purple
+                                                        ]),
+                                                        startPoint: .leading,
+                                                        endPoint: .trailing
+                                                    )
+                                                )
+                                        }
+                                    }
                 Spacer()
                 
             }

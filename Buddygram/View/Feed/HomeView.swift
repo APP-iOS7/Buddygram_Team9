@@ -110,7 +110,8 @@ struct FirebasePostView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
             
             // 게시물 이미지
             if let url = URL(string: post.imageURL) {
