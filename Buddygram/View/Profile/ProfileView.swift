@@ -18,6 +18,7 @@ struct ProfileView: View {
     
     var body: some View {
         VStack (spacing: 20) {
+            
             Text("프로필 화면")
                 .font(.largeTitle)
             
@@ -145,4 +146,8 @@ struct PasswordInputView: View {
         .background(Color(.systemBackground))
         .cornerRadius(20)
     }
+}
+#Preview {
+    ProfileView(selectedTab: .constant(0))
+        .environmentObject(AuthViewModel())
 }
