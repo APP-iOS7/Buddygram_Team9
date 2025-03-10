@@ -29,6 +29,7 @@ struct ProfileView: View {
     
     var body: some View {
 <<<<<<< HEAD
+<<<<<<< HEAD
         VStack (spacing: 20) {
             
             Text("프로필 화면")
@@ -39,6 +40,8 @@ struct ProfileView: View {
                     Text("사용자 이름: \(user.username)")
                     Text("이메일: \(user.email)")
 =======
+=======
+>>>>>>> 9eb3c03a24707d8588b2551d8a301b0977aafea9
         NavigationView {
             ScrollView {
                 VStack (spacing: 20) {
@@ -196,6 +199,7 @@ struct ProfileView: View {
                         }
                         .padding()
                     }
+<<<<<<< HEAD
 >>>>>>> 9eb3c03 (기능구현 최신화)
                 }
             }
@@ -231,6 +235,42 @@ struct ProfileView: View {
                 Text("모든 데이터가 삭제되며, 이 작업은 되돌릴 수 없습니다.")
             }
             
+=======
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("프로필")
+            .onAppear {
+                fetchUserPosts()
+            }
+            .onChange(of: selectedTab) { _, newValue in
+                if newValue == 4 {
+                    fetchUserPosts()
+                }
+            }
+            
+            // 비밀번호 입력 다이어로그
+            .sheet(isPresented: $showingPasswordDialog) {
+                PasswordInputView(
+                    password: $deletePassword,
+                    onSubmit: {
+                        showingPasswordDialog = false
+                        showingDeleteConfirmation = true
+                    }
+                )
+            }
+            
+            // 회원탈퇴 확인 창
+            .alert("정말 탈퇴하시겠습니까?", isPresented: $showingDeleteConfirmation) {
+                Button("취소", role: .cancel) {}
+                Button("탈퇴", role: .destructive) {
+                    deleteAccount()
+                }
+            } message: {
+                Text("모든 데이터가 삭제되며, 이 작업은 되돌릴 수 없습니다.")
+            }
+            
+>>>>>>> 9eb3c03a24707d8588b2551d8a301b0977aafea9
             // 오류 알림창
             .alert("오류", isPresented: $showingErrorAlert) {
                 Button("확인", role: .cancel) {}
@@ -415,6 +455,7 @@ struct PasswordInputView: View {
     }
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 #Preview {
     ProfileView(selectedTab: .constant(0))
         .environmentObject(AuthViewModel())
@@ -422,3 +463,6 @@ struct PasswordInputView: View {
 =======
 
 >>>>>>> 9eb3c03 (기능구현 최신화)
+=======
+
+>>>>>>> 9eb3c03a24707d8588b2551d8a301b0977aafea9
