@@ -19,6 +19,7 @@ struct User: Identifiable, Codable {
     var profileImageURL: String?
     var createdAt: Date
     var likedPostIDs: [String] = []
+    var postCount: Int
     
     // 추가 : Firebase
     static func fromFirebasestore(document: DocumentSnapshot) -> User? {
@@ -30,7 +31,8 @@ struct User: Identifiable, Codable {
             email: data["email"] as? String ?? "",
             profileImageURL: data["profileImageURL"] as? String,
             createdAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
-            likedPostIDs: data["likePostIDs"] as? [String] ?? []
+            likedPostIDs: data["likePostIDs"] as? [String] ?? [],
+            postCount: data["postCount"] as? Int ?? 0 // 추가
         )
     }
 }

@@ -28,27 +28,10 @@ struct HomeView: View {
                     }
                 }
                 
-                if postViewModel.isLoading && !isRefreshing {
+               if postViewModel.isLoading && !isRefreshing {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
                         .padding(.top, 50)
-                } else if postViewModel.posts.isEmpty {
-                    VStack(spacing: 20) {
-                        Text("아직 게시물이 없습니다.")
-                            .font(.headline)
-                            .padding(.top, 100)
-                        
-                        Button(action: {
-                            selectedTab = 0
-                        }) {
-                            Text("첫 게시물 업로드하기")
-                                .font(.system(size: btnFontSize, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 200, height: btnHeight)
-                                .background(Color("PrimaryButtonColor"))
-                                .cornerRadius(btnCornerRadius)
-                        }
-                    }
                 } else {
                     // Firebase에서 가져온 Post 모델을 사용하여 게시물 표시
                     LazyVStack(spacing: 20) {

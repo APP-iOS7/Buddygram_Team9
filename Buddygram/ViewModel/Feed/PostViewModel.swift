@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Firebase
+import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 import UIKit
@@ -206,6 +207,14 @@ class PostViewModel: ObservableObject {
                 }
             }
         }
+        
+        db.collection("users").document(user.id).updateData([
+            "postCount": FieldValue.increment(Int64(1))
+        ]) { error in
+            if let error = error {
+                print("postCount 업데이트 실패: \(error.localizedDescription)")
+            }
+        }
     }
     
     // 좋아요 버튼
@@ -229,7 +238,9 @@ class PostViewModel: ObservableObject {
             var likedBy = post["likedBy"] as? [String] ?? []
             var likeCount = post["likeCount"] as? Int ?? 0
             
-            if likedBy.contains(userId) {
+            let isCurrentlyLiked = likedBy.contains(userId)
+            
+            if isCurrentlyLiked {
                 // 좋아요 취소
                 likedBy.removeAll { $0 == userId }
                 likeCount = max(0, likeCount - 1)
@@ -246,7 +257,7 @@ class PostViewModel: ObservableObject {
             
             return [
                 "success": true,
-                "liked": likedBy.contains(userId)
+                "liked": !isCurrentlyLiked
             ]
         }) { [weak self] (result, error) in
             if let error = error {
@@ -323,6 +334,16 @@ class PostViewModel: ObservableObject {
                 }
             }
         }
+        // 게시물 삭제 후 사용자의 postCount 감소
+        if let currentUser = Auth.auth().currentUser {
+            let userRef = db.collection("users").document(currentUser.uid)
+            userRef.updateData([
+                "postCount": FieldValue.increment(Int64(-1))
+            ]) { error in
+                if let error = error {
+                    print("postCount 감소 실패: \(error.localizedDescription)")
+                }
+            }
+        }
     }
-    
 }

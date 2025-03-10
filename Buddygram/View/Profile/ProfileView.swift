@@ -16,6 +16,7 @@ struct ProfileView: View {
     @Binding var selectedTab: Int
     
     @State private var userPosts: [Post] = []
+    @State private var userPostCount: Int = 0 // 추가 : 게시물 카운트용
     @State private var isLoading = false
     @State private var isRefreshing = false
     @State private var showingPasswordDialog = false
@@ -73,7 +74,7 @@ struct ProfileView: View {
                                 
                                 HStack(spacing: 20) {
                                     VStack {
-                                        Text("\(userPosts.count)")
+                                        Text("\(user.postCount)")
                                             .font(.headline)
                                         Text("게시물")
                                             .font(.caption)
@@ -272,6 +273,7 @@ struct ProfileView: View {
         
         postViewModel.fetchUserPosts(uid: uid) { posts in
             self.userPosts = posts
+            self.userPostCount = posts.count
             self.isLoading = false
         }
     }
@@ -379,7 +381,7 @@ struct PostGridItem: View {
                 ]
             )
         }
-}
+    }
     
     // 게시물 삭제 함수
     private func deletePost() {
