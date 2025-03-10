@@ -16,6 +16,7 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                Spacer()
                 
                 // 이메일 & 비밀번호 텍스트필드
                 VStack(spacing: 12) {
