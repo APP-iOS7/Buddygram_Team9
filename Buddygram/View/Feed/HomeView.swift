@@ -7,10 +7,12 @@
 
 import SwiftUI
 import Firebase
+import FirebaseAuth
 import FirebaseStorage
 import Kingfisher
 
 struct HomeView: View {
+    // 바인딩 제거, 환경객체 사용
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var postViewModel: PostViewModel
     @State private var isRefreshing = false
@@ -18,140 +20,216 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 15) {
-                    ForEach(postViewModel.posts) { post in
-                        PostView(post: post)
+                // 새로고침 컨트롤
+                RefreshControl(isRefreshing: $isRefreshing) {
+                    postViewModel.fetchAllPosts {
+                        isRefreshing = false
                     }
                 }
-                .padding(.horizontal)
+                
+                if postViewModel.isLoading && !isRefreshing {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .padding(.top, 50)
+                } else if postViewModel.posts.isEmpty {
+                    VStack(spacing: 20) {
+                        Text("아직 게시물이 없습니다.")
+                            .font(.headline)
+                            .padding(.top, 100)
+                        
+                        // 탭 변경을 위해 selectedTab 대신 TabView의 인덱스를 직접 변경
+                        Button(action: {
+                            // selectedTab 값을 직접 변경하는 방식으로 수정
+                            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                               let tabBarController = scene.windows.first?.rootViewController as? UITabBarController {
+                                tabBarController.selectedIndex = 0
+                            }
+                        }) {
+                            Text("첫 게시물 업로드하기")
+                                .font(.system(size: btnFontSize, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 200, height: btnHeight)
+                                .background(Color("PrimaryButtonColor"))
+                                .cornerRadius(btnCornerRadius)
+                        }
+                    }
+                } else {
+                    // Firebase에서 가져온 Post 모델을 사용하여 게시물 표시
+                    LazyVStack(spacing: 20) {
+                        ForEach(postViewModel.posts) { post in
+                            FirebasePostView(post: post)
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .refreshable {
+                await withCheckedContinuation { continuation in
+                    postViewModel.fetchAllPosts {
+                        continuation.resume()
+                    }
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Buddygram")
-                        .font(.title2)
+                        .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundStyle(LinearGradient(
-                            gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
+                            gradient: Gradient(colors: [Color.green, Color.yellow, Color.purple, Color.pink]),
                             startPoint: .leading,
                             endPoint: .trailing
                         ))
                 }
             }
-            .background(Color(.systemGray6)) // 전체 배경 색상 추가
+        }
+        .onAppear {
+            if !postViewModel.isLoading {
+                postViewModel.fetchAllPosts()
+            }
         }
     }
 }
 
-struct PostView: View {
+// FirebasePostView: Firebase에서 가져온 Post 모델을 사용하는 뷰
+struct FirebasePostView: View {
     let post: Post
     @State private var isShowingComments = false
     @State private var newComment = ""
-    @State private var animateLike = false
+    @State private var isLiked: Bool
     
     @EnvironmentObject var postViewModel: PostViewModel
     
     init(post: Post) {
         self.post = post
-        self._animateLike = State(initialValue: post.likedBy.contains(Auth.auth().currentUser?.uid ?? ""))
+        self._isLiked = State(initialValue: post.likedBy.contains(Auth.auth().currentUser?.uid ?? ""))
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // 사용자 정보
+        VStack(alignment: .leading) {
+            // 사용자 이름
             HStack {
-                Image(systemName: "person.circle.fill") // 프로필 이미지 (임시)
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(.gray)
+                if let profileURL = post.ownerProfileImageURL, let url = URL(string: profileURL) {
+                    KFImage(url)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                } else {
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 40, height: 40)
+                        .foregroundColor(.gray)
+                }
                 
-                Text(post.onwerUsername)
+                Text(post.ownerUsername)
                     .font(.headline)
-                    .fontWeight(.semibold)
                 
                 Spacer()
+                
+                Text(post.createdAt, style: .date)
+                    .font(.caption)
+                    .foregroundColor(.gray)
             }
             .padding(.horizontal)
             
             // 게시물 이미지
-            Image(post.image)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 300)
-                .clipped()
-                .cornerRadius(10)
+            if let url = URL(string: post.imageURL) {
+                KFImage(url)
+                    .placeholder {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.2))
+                            .overlay(
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            )
+                    }
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 300)
+                    .clipped()
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 300)
+                    .overlay(
+                        Image(systemName: "photo")
+                            .font(.largeTitle)
+                            .foregroundColor(.gray)
+                    )
+            }
+            
+            // 캡션
+            if let caption = post.caption {
+                Text(caption)
+                    .padding(.horizontal)
+                    .padding(.top, 4)
+            }
             
             // 좋아요, 댓글, 채팅 버튼
-            HStack(spacing: 20) {
+            HStack {
+                // 좋아요 버튼
                 Button(action: {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        post.isLiked.toggle()
-                        animateLike = post.isLiked
-                    }
+                    toggleLike()
                 }) {
-                    Image(systemName: post.isLiked ? "heart.fill" : "heart")
-                        .resizable()
-                        .frame(width: 24, height: 22)
-                        .foregroundColor(post.isLiked ? .red : .red)
-                        .scaleEffect(animateLike ? 1.2 : 1.0) // 좋아요 애니메이션
+                    Image(systemName: isLiked ? "heart.fill" : "heart")
+                        .foregroundColor(.red)
                 }
                 
+                Text("\(post.likeCount)")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                
+                // 댓글 버튼
                 Button(action: {
                     isShowingComments.toggle()
                 }) {
                     Image(systemName: "message")
-                        .resizable()
-                        .frame(width: 22, height: 22)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.green)
                 }
                 
-                NavigationLink(destination: ChatView(username: post.username)) {
+                Text("\(post.commentCount)")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                
+                // 채팅 버튼
+                NavigationLink(destination: ChatView(username: post.ownerUsername)) {
                     Image(systemName: "paperplane.fill")
-                        .resizable()
-                        .frame(width: 22, height: 22)
                         .foregroundColor(.green)
                 }
                 
                 Spacer()
             }
             .padding(.horizontal)
+            .padding(.top, 8)
             
-            // 댓글창
+            // 댓글창 (isShowingComments가 true일 때만 표시)
             if isShowingComments {
                 VStack(alignment: .leading, spacing: 5) {
-                    ForEach(post.comments, id: \.self) { comment in
-                        Text(comment)
-                            .font(.system(size: 14))
-                            .padding(.vertical, 5)
-                            .padding(.horizontal, 10)
-                            .background(Color(.systemGray5))
-                            .cornerRadius(10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    if post.commentCount == 0 {
+                        Text("아직 댓글이 없습니다.")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .padding(.vertical, 2)
+                            .padding(.horizontal)
                     }
                     
                     // 댓글 입력창
                     HStack {
                         TextField("댓글 입력...", text: $newComment)
-                            .padding(10)
-                            .background(Color.white)
-                            .cornerRadius(20)
-                            .shadow(radius: 1)
-                        
-                        Spacer()
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                         
                         Button(action: {
                             if !newComment.isEmpty {
-                                post.comments.append(newComment)
+                                // 댓글 기능은 나중에 구현
                                 newComment = ""
                             }
                         }) {
                             Image(systemName: "paperplane.fill")
-                                .foregroundColor(.white)
-                                .padding(8)
-                                .background(Color.green)
-                                .clipShape(Circle())
-                                .frame(width: 25, height: 25)
+                                .foregroundColor(.blue)
                         }
-                        .padding(.leading, 5)
                     }
                     .padding(.horizontal)
                 }
@@ -159,61 +237,27 @@ struct PostView: View {
             }
         }
         .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 3)
-        .padding(.vertical, 8)
+        .cornerRadius(10)
+        .shadow(radius: 5)
+        .padding(.horizontal)
     }
     
-    
-    // 추가: 좋아요 토글
     private func toggleLike() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
-        animateLike.toggle()
+        isLiked.toggle() // UI 즉시 업데이트
         
         postViewModel.toggleLike(postId: post.id, userId: userId) { success in
             if !success {
-                animateLike.toggle()
+                // 실패시 상태 복원
+                isLiked.toggle()
             }
         }
     }
 }
 
-// 추가: 스와이프 새로고침 컨트롤
-struct RefreshControl: View {
-    @Binding var isRefreshing: Bool
-    let onRefresh: () -> Void
-    
-    var body: some View {
-        GeometryReader { geometry in
-            if geometry.frame(in: .global).minY > 50 {
-                Spacer()
-                    .onAppear() {
-                        if !isRefreshing {
-                            isRefreshing = true
-                            onRefresh()
-                        }
-                    }
-            } else if geometry.frame(in: .global).minY < 1 {
-                Spacer()
-                    .onAppear {
-                        isRefreshing = false
-                    }
-            }
-            
-            HStack {
-                Spacer()
-                if isRefreshing {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                }
-                Spacer()
-            }
-        }.frame(height: isRefreshing ? 50 : 0)
-    }
-}
-
 #Preview {
     HomeView()
+        .environmentObject(AuthViewModel())
+        .environmentObject(PostViewModel())
 }
-
