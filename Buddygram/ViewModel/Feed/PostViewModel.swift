@@ -83,7 +83,7 @@ class PostViewModel: ObservableObject {
             .whereField("ownerUid", isEqualTo: uid)
             .order(by: "createdAt", descending: true)
             .getDocuments { [weak self] (snapshot, error) in
-                guard let self = self else { return }
+                guard let self = self else { return completion([]) }
                 
                 self.isLoading = false
                 
