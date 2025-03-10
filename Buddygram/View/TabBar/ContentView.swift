@@ -59,6 +59,7 @@ struct ContentView: View {
                             Image(systemName: "person.circle.fill")
                         }
                         .tag(4)
+                        .environmentObject(authViewModel)
                 }
                
             } else {

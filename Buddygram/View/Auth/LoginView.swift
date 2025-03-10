@@ -137,7 +137,7 @@ struct LoginView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Buddygram")
-                        .font(.largeTitle) // ✅ 크기 키우기
+                        .font(.largeTitle) 
                         .fontWeight(.bold)
                         .foregroundStyle(LinearGradient(
                             gradient: Gradient(colors: [Color.green,Color.green, Color.green, Color.pink, Color.pink, Color.purple]),

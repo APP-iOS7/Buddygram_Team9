@@ -61,7 +61,7 @@ struct ChatView: View {
 //            .background(Color.white)
 //            .cornerRadius(20)
 //            .overlay(RoundedRectangle(cornerRadius: 20)
-//                .stroke(Color.green,lineWidth:2))
+//                .stroke(Color.green,lineWidth:3))
         }
                 
     }
