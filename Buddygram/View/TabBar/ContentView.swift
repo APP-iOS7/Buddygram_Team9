@@ -20,7 +20,7 @@ struct ContentView: View {
             if authViewModel.isAuthenticated {
                 TabView(selection: $selectedTab) {
                     // 홈
-                    HomeView()
+                    HomeView(selectedTab: $selectedTab)
                         .tabItem {
                             Image(systemName: "house.fill")
                         }
@@ -42,7 +42,7 @@ struct ContentView: View {
                     
                     
                     // 좋아요
-                    LikeView()
+                    LikeView(selectedTab: $selectedTab)
                         .tabItem {
                             Image(systemName: "heart.fill")
                         }
