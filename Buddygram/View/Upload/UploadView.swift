@@ -160,7 +160,7 @@ struct UploadView: View {
                 }
                 .padding()
             } else {
-                // 이미지가 있을 때 변경 버튼 표시
+                이미지가 있을 때 변경 버튼 표시
                 Button(action: {
                     showImageSourceOptions = true
                 }) {
