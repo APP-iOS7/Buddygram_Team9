@@ -17,11 +17,11 @@ struct LoginView: View {
         NavigationView {
             VStack(spacing: 0) {
                 
-                Text("Buddygram")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(Color("TextColor"))
-                    .padding(.top, 20)
-                    .padding(.bottom, 12)
+//                Text("Buddygram")
+//                    .font(.system(size: 22, weight: .bold))
+//                    .foregroundStyle(Color("TextColor"))
+//                    .padding(.top, 20)
+//                    .padding(.bottom, 12)
                 
                 // 이메일 & 비밀번호 텍스트필드
                 VStack(spacing: 12) {
@@ -134,6 +134,19 @@ struct LoginView: View {
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Buddygram")
+                        .font(.largeTitle) // ✅ 크기 키우기
+                        .fontWeight(.bold)
+                        .foregroundStyle(LinearGradient(
+                            gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                }
+            }
+            
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()

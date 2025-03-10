@@ -29,7 +29,13 @@ struct LikeView: View {
                     .padding()
                 }
             }
-            .navigationTitle("❤️ 좋아요한 게시물")
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("❤️ 좋아요한 게시물")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     VStack {

@@ -33,7 +33,7 @@ struct HomeView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Buddygram")
-                        .font(.title2)
+                        .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundStyle(LinearGradient(
                             gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
@@ -99,7 +99,7 @@ struct PostView: View {
                     Image(systemName: "message")
                         .resizable()
                         .frame(width: 22, height: 22)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.black)
                 }
 
                 NavigationLink(destination: ChatView(username: post.username)) {
@@ -110,6 +110,7 @@ struct PostView: View {
                 }
 
                 Spacer()
+                    .padding()
             }
             .padding(.horizontal)
 

@@ -18,6 +18,18 @@ struct ChatListView: View {
                 }
             }
             .navigationTitle("메시지")
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Buddygram")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundStyle(LinearGradient(
+                            gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                }
+            }
         }
     }
 }
