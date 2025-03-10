@@ -209,12 +209,81 @@ class PostViewModel: ObservableObject {
     }
     
     // 좋아요 버튼
-    func toggleLike() {
+    func toggleLike(postId: String, userId: String, completion: @escaping (Bool) -> Void = {_ in}) {
+        let postRef = db.collection("posts").document(postId)
         
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let postDocument: DocumentSnapshot
+            
+            do {
+                try postDocument = transaction.getDocument(postRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            
+            guard let post = postDocument.data() else {
+                return nil
+            }
+            
+            var likedBy = post["likedBy"] as? [String] ?? []
+            var likeCount = post["likeCount"] as? Int ?? 0
+            
+            if likedBy.contains(userId) {
+                // 좋아요 취소
+                likedBy.removeAll { $0 == userId }
+                likeCount = max(0, likeCount - 1)
+            } else {
+                // 좋아요 추가
+                likedBy.append(userId)
+                likeCount += 1
+            }
+            
+            transaction.updateData([
+                "likedBy": likedBy,
+                "likeCount": likeCount
+            ], forDocument: postRef)
+            
+            return [
+                "success": true,
+                "liked": likedBy.contains(userId)
+            ]
+        }) { [weak self] (result, error) in
+            if let error = error {
+                print("좋아요 처리 중 오류 발생: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            // 게시물 목록 새로고침
+            self?.fetchAllPosts {
+                completion(true)
+            }
+        }
     }
     
     // 환영 게시물 생성 (새 사용자용)
-    func createWelcomePost() {
+    func createWelcomePost(for user: User, completion: @escaping (Bool) -> Void = {_ in}) {
+        let welcomePostData: [String: Any] = [
+            "ownerUid": "admin", // 관리자 ID
+            "ownerUsername": "Buddygram",
+            "ownerProfileImageURL": "",
+            "caption": "\(user.username)님, Buddygram에 오신 것을 환영합니다! 첫 게시물을 업로드해보세요.",
+            "imageURL": "https://firebasestorage.googleapis.com/v0/b/your-project-id.appspot.com/o/welcome_image.jpg", // 환영 이미지 URL로 수정 필요
+            "likeCount": 1,
+            "commentCount": 0,
+            "createdAt": Timestamp(date: Date()),
+            "likedBy": ["admin"] // 기본적으로 관리자가 좋아요 누름
+        ]
         
+        db.collection("posts").addDocument(data: welcomePostData) { error in
+            if let error = error {
+                print("환영 게시물 생성 중 오류 발생: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            completion(true)
+        }
     }
 }
