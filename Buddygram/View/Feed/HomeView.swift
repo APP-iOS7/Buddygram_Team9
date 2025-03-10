@@ -18,46 +18,54 @@ struct FeedPost: Identifiable {
 import SwiftUI
 
 struct HomeView: View {
-    @Binding var posts: [FeedPost] // ContentView에서 데이터를 바인딩으로 받음
+    @Binding var posts: [FeedPost]
 
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 15) {
                     ForEach($posts) { $post in
-                        PostView(post: $post) // 각 게시물을 PostView로 렌더링
+                        PostView(post: $post)
                     }
                 }
-                .padding()
+                .padding(.horizontal)
             }
-            
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Buddygram")
-                        .font(.largeTitle)
+                        .font(.title2)
                         .fontWeight(.bold)
                         .foregroundStyle(LinearGradient(
-                            gradient: Gradient(colors: [Color.green, Color.yellow, Color.purple, Color.pink]),
+                            gradient: Gradient(colors: [Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
                             startPoint: .leading,
                             endPoint: .trailing
                         ))
                 }
             }
+            .background(Color(.systemGray6)) // 전체 배경 색상 추가
         }
     }
 }
 
 struct PostView: View {
     @Binding var post: FeedPost
-    @State private var isShowingComments = false // 댓글 창 표시 여부
-    @State private var newComment = "" // 입력 중인 댓글
+    @State private var isShowingComments = false
+    @State private var newComment = ""
+    @State private var animateLike = false
 
     var body: some View {
-        VStack(alignment: .leading) {
-            // 사용자 이름
+        VStack(alignment: .leading, spacing: 10) {
+            // 사용자 정보
             HStack {
+                Image(systemName: "person.circle.fill") // 프로필 이미지 (임시)
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(.gray)
+                
                 Text(post.username)
                     .font(.headline)
+                    .fontWeight(.semibold)
+                
                 Spacer()
             }
             .padding(.horizontal)
@@ -68,28 +76,36 @@ struct PostView: View {
                 .aspectRatio(contentMode: .fill)
                 .frame(height: 300)
                 .clipped()
+                .cornerRadius(10)
 
             // 좋아요, 댓글, 채팅 버튼
-            HStack {
-                // 좋아요 버튼
+            HStack(spacing: 20) {
                 Button(action: {
-                    post.isLiked.toggle() // 좋아요 상태 변경
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        post.isLiked.toggle()
+                        animateLike = post.isLiked
+                    }
                 }) {
                     Image(systemName: post.isLiked ? "heart.fill" : "heart")
+                        .resizable()
+                        .frame(width: 24, height: 22)
                         .foregroundColor(post.isLiked ? .red : .red)
+                        .scaleEffect(animateLike ? 1.2 : 1.0) // 좋아요 애니메이션
                 }
 
-                // 댓글 버튼
                 Button(action: {
                     isShowingComments.toggle()
                 }) {
                     Image(systemName: "message")
-                        .foregroundColor(.green)
+                        .resizable()
+                        .frame(width: 22, height: 22)
+                        .foregroundColor(.blue)
                 }
 
-                // 채팅 버튼
                 NavigationLink(destination: ChatView(username: post.username)) {
                     Image(systemName: "paperplane.fill")
+                        .resizable()
+                        .frame(width: 22, height: 22)
                         .foregroundColor(.green)
                 }
 
@@ -97,31 +113,43 @@ struct PostView: View {
             }
             .padding(.horizontal)
 
-            // 댓글창 (isShowingComments가 true일 때만 표시)
+            // 댓글창
             if isShowingComments {
                 VStack(alignment: .leading, spacing: 5) {
                     ForEach(post.comments, id: \.self) { comment in
                         Text(comment)
-                            .padding(.vertical, 2)
-                            .padding(.horizontal)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(5)
+                            .font(.system(size: 14))
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .background(Color(.systemGray5))
+                            .cornerRadius(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
                     // 댓글 입력창
                     HStack {
                         TextField("댓글 입력...", text: $newComment)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(10)
+                            .background(Color.white)
+                            .cornerRadius(20)
+                            .shadow(radius: 1)
+                        
+                        Spacer()
 
                         Button(action: {
                             if !newComment.isEmpty {
-                                post.comments.append(newComment) // 댓글 추가
+                                post.comments.append(newComment)
                                 newComment = ""
                             }
                         }) {
                             Image(systemName: "paperplane.fill")
-                                .foregroundColor(.black)
+                                .foregroundColor(.white)
+                                .padding(8)
+                                .background(Color.green)
+                                .clipShape(Circle())
+                                .frame(width: 25, height: 25)
                         }
+                        .padding(.leading, 5)
                     }
                     .padding(.horizontal)
                 }
@@ -129,9 +157,9 @@ struct PostView: View {
             }
         }
         .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 5)
-        .padding(.horizontal)
+        .cornerRadius(12)
+        .shadow(radius: 3)
+        .padding(.vertical, 8)
     }
 }
 
