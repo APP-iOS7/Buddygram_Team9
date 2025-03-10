@@ -11,14 +11,16 @@ import FirebaseStorage
 import Kingfisher
 
 struct HomeView: View {
-    @Binding var posts: [FeedPost]
-
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var postViewModel: PostViewModel
+    @State private var isRefreshing = false
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 15) {
-                    ForEach($posts) { $post in
-                        PostView(post: $post)
+                    ForEach(postViewModel.posts) { post in
+                        PostView(post: post)
                     }
                 }
                 .padding(.horizontal)
@@ -41,11 +43,18 @@ struct HomeView: View {
 }
 
 struct PostView: View {
-    @Binding var post: FeedPost
+    let post: Post
     @State private var isShowingComments = false
     @State private var newComment = ""
     @State private var animateLike = false
-
+    
+    @EnvironmentObject var postViewModel: PostViewModel
+    
+    init(post: Post) {
+        self.post = post
+        self._animateLike = State(initialValue: post.likedBy.contains(Auth.auth().currentUser?.uid ?? ""))
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             // 사용자 정보
@@ -55,14 +64,14 @@ struct PostView: View {
                     .frame(width: 40, height: 40)
                     .foregroundColor(.gray)
                 
-                Text(post.username)
+                Text(post.onwerUsername)
                     .font(.headline)
                     .fontWeight(.semibold)
                 
                 Spacer()
             }
             .padding(.horizontal)
-
+            
             // 게시물 이미지
             Image(post.image)
                 .resizable()
@@ -70,7 +79,7 @@ struct PostView: View {
                 .frame(height: 300)
                 .clipped()
                 .cornerRadius(10)
-
+            
             // 좋아요, 댓글, 채팅 버튼
             HStack(spacing: 20) {
                 Button(action: {
@@ -85,7 +94,7 @@ struct PostView: View {
                         .foregroundColor(post.isLiked ? .red : .red)
                         .scaleEffect(animateLike ? 1.2 : 1.0) // 좋아요 애니메이션
                 }
-
+                
                 Button(action: {
                     isShowingComments.toggle()
                 }) {
@@ -94,18 +103,18 @@ struct PostView: View {
                         .frame(width: 22, height: 22)
                         .foregroundColor(.blue)
                 }
-
+                
                 NavigationLink(destination: ChatView(username: post.username)) {
                     Image(systemName: "paperplane.fill")
                         .resizable()
                         .frame(width: 22, height: 22)
                         .foregroundColor(.green)
                 }
-
+                
                 Spacer()
             }
             .padding(.horizontal)
-
+            
             // 댓글창
             if isShowingComments {
                 VStack(alignment: .leading, spacing: 5) {
@@ -118,7 +127,7 @@ struct PostView: View {
                             .cornerRadius(10)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-
+                    
                     // 댓글 입력창
                     HStack {
                         TextField("댓글 입력...", text: $newComment)
@@ -128,7 +137,7 @@ struct PostView: View {
                             .shadow(radius: 1)
                         
                         Spacer()
-
+                        
                         Button(action: {
                             if !newComment.isEmpty {
                                 post.comments.append(newComment)
@@ -154,13 +163,57 @@ struct PostView: View {
         .shadow(radius: 3)
         .padding(.vertical, 8)
     }
+    
+    
+    // 추가: 좋아요 토글
+    private func toggleLike() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        animateLike.toggle()
+        
+        postViewModel.toggleLike(postId: post.id, userId: userId) { success in
+            if !success {
+                animateLike.toggle()
+            }
+        }
+    }
 }
 
+// 추가: 스와이프 새로고침 컨트롤
+struct RefreshControl: View {
+    @Binding var isRefreshing: Bool
+    let onRefresh: () -> Void
+    
+    var body: some View {
+        GeometryReader { geometry in
+            if geometry.frame(in: .global).minY > 50 {
+                Spacer()
+                    .onAppear() {
+                        if !isRefreshing {
+                            isRefreshing = true
+                            onRefresh()
+                        }
+                    }
+            } else if geometry.frame(in: .global).minY < 1 {
+                Spacer()
+                    .onAppear {
+                        isRefreshing = false
+                    }
+            }
+            
+            HStack {
+                Spacer()
+                if isRefreshing {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                }
+                Spacer()
+            }
+        }.frame(height: isRefreshing ? 50 : 0)
+    }
+}
 
 #Preview {
-    HomeView(posts: .constant([
-        FeedPost(username: "user1", image: "post1", isLiked: false),
-        FeedPost(username: "user2", image: "post2", isLiked: true)
-    ]))
+    HomeView()
 }
 
