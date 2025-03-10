@@ -27,14 +27,16 @@ struct LikeView: View {
             .navigationTitle("❤️ 좋아요한 게시물")
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Buddygram")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundStyle(LinearGradient(
-                            gradient: Gradient(colors: [Color.green, Color.yellow, Color.purple, Color.pink]),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ))
+                    VStack {
+                        Text("Buddygram")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundStyle(LinearGradient(
+                                gradient: Gradient(colors: [Color.green, Color.yellow, Color.purple, Color.pink]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ))
+                    }
                 }
             }
         }

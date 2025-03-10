@@ -120,7 +120,7 @@ struct PostView: View {
                             }
                         }) {
                             Image(systemName: "paperplane.fill")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.black)
                         }
                     }
                     .padding(.horizontal)
