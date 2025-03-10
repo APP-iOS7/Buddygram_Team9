@@ -9,11 +9,11 @@ import SwiftUI
 
 struct LikeView: View {
     @Binding var posts: [FeedPost]
-
+    
     var likedPosts: [FeedPost] {
         posts.filter { $0.isLiked }
     }
-
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -22,6 +22,11 @@ struct LikeView: View {
                 
                 ScrollView {
                     VStack(spacing: 20) {
+                        Text("❤️")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .padding(.leading)
+                        
                         ForEach(likedPosts) { post in
                             LikedPostView(post: post)
                         }
@@ -29,16 +34,9 @@ struct LikeView: View {
                     .padding()
                 }
             }
+            
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("❤️ 좋아요한 게시물")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    VStack {
                         Text("Buddygram")
                             .font(.largeTitle)
                             .fontWeight(.bold)
@@ -47,7 +45,6 @@ struct LikeView: View {
                                 startPoint: .leading,
                                 endPoint: .trailing
                             ))
-                    }
                 }
             }
         }
