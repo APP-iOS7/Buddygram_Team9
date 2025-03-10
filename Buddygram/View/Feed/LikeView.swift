@@ -45,7 +45,6 @@ struct LikeView: View {
                             .padding(.top, 100)
                         
                         Button(action: {
-                            // 홈 탭으로 이동
                             selectedTab = 0
                         }) {
                             Text("홈으로 돌아가기")

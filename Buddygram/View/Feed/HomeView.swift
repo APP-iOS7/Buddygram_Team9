@@ -38,11 +38,8 @@ struct HomeView: View {
                             .font(.headline)
                             .padding(.top, 100)
                         
-                        // 탭 변경을 위해 selectedTab 대신 TabView의 인덱스를 직접 변경
                         Button(action: {
-                            // selectedTab 값을 직접 변경하는 방식으로 수정
                             selectedTab = 0
-                            
                         }) {
                             Text("첫 게시물 업로드하기")
                                 .font(.system(size: btnFontSize, weight: .bold))
