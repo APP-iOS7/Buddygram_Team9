@@ -6,16 +6,9 @@
 //
 
 import SwiftUI
-
-struct FeedPost: Identifiable {
-    let id = UUID()
-    let username: String
-    let image: String
-    var isLiked: Bool
-    var comments: [String] = []
-}
-
-import SwiftUI
+import Firebase
+import FirebaseStorage
+import Kingfisher
 
 struct HomeView: View {
     @Binding var posts: [FeedPost]
