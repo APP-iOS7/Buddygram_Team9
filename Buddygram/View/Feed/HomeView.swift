@@ -28,19 +28,13 @@ struct HomeView: View {
                     }
                 }
                 
-              /* if postViewModel.isLoading && !isRefreshing {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                        .padding(.top, 50)
-                } else {*/
-                    // Firebase에서 가져온 Post 모델을 사용하여 게시물 표시
-                    LazyVStack(spacing: 20) {
-                        ForEach(postViewModel.posts) { post in
-                            FirebasePostView(post: post)
-                        }
+                // Firebase에서 가져온 Post 모델을 사용하여 게시물 표시
+                LazyVStack(spacing: 20) {
+                    ForEach(postViewModel.posts) { post in
+                        FirebasePostView(post: post)
                     }
-                    .padding()
-                //}
+                }
+                .padding()
             }
             .navigationBarTitleDisplayMode(.inline)
             .refreshable {
@@ -56,12 +50,13 @@ struct HomeView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundStyle(LinearGradient(
-                            gradient: Gradient(colors: [Color.green, Color.yellow, Color.purple, Color.pink]),
+                            gradient: Gradient(colors: [Color.green, Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
                             startPoint: .leading,
                             endPoint: .trailing
                         ))
                 }
             }
+            .background(Color(.systemGray6)) // UI에서 추가된 배경 색상
         }
         .onAppear {
             if !postViewModel.isLoading {
@@ -77,6 +72,7 @@ struct FirebasePostView: View {
     @State private var isShowingComments = false
     @State private var newComment = ""
     @State private var isLiked: Bool
+    @State private var animateLike = false // UI에서 가져온 애니메이션 상태
     
     @EnvironmentObject var postViewModel: PostViewModel
     
@@ -87,8 +83,8 @@ struct FirebasePostView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading) {
-            // 사용자 이름
+        VStack(alignment: .leading, spacing: 10) { // UI에서 가져온 spacing 값
+            // 사용자 정보
             HStack {
                 if let profileURL = post.ownerProfileImageURL, let url = URL(string: profileURL) {
                     KFImage(url)
@@ -99,13 +95,13 @@ struct FirebasePostView: View {
                 } else {
                     Image(systemName: "person.circle.fill")
                         .resizable()
-                        .scaledToFill()
                         .frame(width: 40, height: 40)
                         .foregroundColor(.gray)
                 }
                 
                 Text(post.ownerUsername)
                     .font(.headline)
+                    .fontWeight(.semibold) // UI에서 가져온 스타일
                 
                 Spacer()
                 
@@ -130,6 +126,7 @@ struct FirebasePostView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(height: 300)
                     .clipped()
+                    .cornerRadius(10) // UI에서 가져온 코너 반경
             } else {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
@@ -139,6 +136,7 @@ struct FirebasePostView: View {
                             .font(.largeTitle)
                             .foregroundColor(.gray)
                     )
+                    .cornerRadius(10) // UI에서 가져온 코너 반경
             }
             
             // 캡션
@@ -149,13 +147,19 @@ struct FirebasePostView: View {
             }
             
             // 좋아요, 댓글, 채팅 버튼
-            HStack {
+            HStack(spacing: 20) { // UI에서 가져온 spacing 값
                 // 좋아요 버튼
                 Button(action: {
-                    toggleLike()
+                    withAnimation(.easeInOut(duration: 0.3)) { // UI에서 가져온 애니메이션
+                        toggleLike()
+                        animateLike = isLiked
+                    }
                 }) {
                     Image(systemName: isLiked ? "heart.fill" : "heart")
+                        .resizable()
+                        .frame(width: 24, height: 22) // UI에서 가져온 크기
                         .foregroundColor(.red)
+                        .scaleEffect(animateLike ? 1.2 : 1.0) // UI에서 가져온 애니메이션
                 }
                 
                 Text("\(post.likeCount)")
@@ -167,7 +171,9 @@ struct FirebasePostView: View {
                     isShowingComments.toggle()
                 }) {
                     Image(systemName: "message")
-                        .foregroundColor(.green)
+                        .resizable()
+                        .frame(width: 22, height: 22) // UI에서 가져온 크기
+                        .foregroundColor(.black) // UI에서 가져온 색상
                 }
                 
                 Text("\(post.commentCount)")
@@ -177,13 +183,15 @@ struct FirebasePostView: View {
                 // 채팅 버튼
                 NavigationLink(destination: ChatView(username: post.ownerUsername)) {
                     Image(systemName: "paperplane.fill")
+                        .resizable()
+                        .frame(width: 22, height: 22) // UI에서 가져온 크기
                         .foregroundColor(.green)
                 }
                 
                 Spacer()
+                    .padding() // UI에서 가져온 패딩
             }
             .padding(.horizontal)
-            .padding(.top, 8)
             
             // 댓글창 (isShowingComments가 true일 때만 표시)
             if isShowingComments {
@@ -193,23 +201,37 @@ struct FirebasePostView: View {
                             .font(.caption)
                             .foregroundColor(.gray)
                             .padding(.vertical, 2)
-                            .padding(.horizontal)
                     }
+                    
+                    // 댓글 표시 (Firebase에서 가져올 예정)
+                    // UI에서 가져온 댓글 스타일을 적용
                     
                     // 댓글 입력창
                     HStack {
                         TextField("댓글 입력...", text: $newComment)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(10)
+                            .background(Color.white)
+                            .cornerRadius(20)
+                            .shadow(radius: 1)
+                        
+                        Spacer()
                         
                         Button(action: {
                             if !newComment.isEmpty {
-                                // 댓글 기능은 나중에 구현
+                                // 댓글 추가 로직 (Firebase에 저장)
+                                
+                                // UI 즉시 업데이트
                                 newComment = ""
                             }
                         }) {
                             Image(systemName: "paperplane.fill")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.white)
+                                .padding(8)
+                                .background(Color.green)
+                                .clipShape(Circle())
+                                .frame(width: 25, height: 25)
                         }
+                        .padding(.leading, 5)
                     }
                     .padding(.horizontal)
                 }
@@ -217,11 +239,12 @@ struct FirebasePostView: View {
             }
         }
         .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 5)
-        .padding(.horizontal)
+        .cornerRadius(12) // UI에서 가져온 값
+        .shadow(radius: 3) // UI에서 가져온 값
+        .padding(.vertical, 8)
     }
     
+    // Firebase 좋아요 토글 기능
     private func toggleLike() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
@@ -235,4 +258,5 @@ struct FirebasePostView: View {
         }
     }
 }
+
 

@@ -26,57 +26,76 @@ struct LikeView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                // Pull to refresh
-                RefreshControl(isRefreshing: $isRefreshing) {
-                    postViewModel.fetchAllPosts {
-                        isRefreshing = false
-                    }
-                }
+            ZStack {
+                Color(.systemGray6) // UI에서 가져온 배경색
+                    .edgesIgnoringSafeArea(.all)
                 
-                if postViewModel.isLoading && !isRefreshing {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                        .padding(.top, 50)
-                } else if likedPosts.isEmpty {
-                    VStack(spacing: 20) {
-                        Text("아직 좋아요한 게시물이 없습니다.")
-                            .font(.headline)
-                            .padding(.top, 100)
-                        
-                        Button(action: {
-                            selectedTab = 0
-                        }) {
-                            Text("홈으로 돌아가기")
-                                .font(.system(size: btnFontSize, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 200, height: btnHeight)
-                                .background(Color("PrimaryButtonColor"))
-                                .cornerRadius(btnCornerRadius)
+                ScrollView {
+                    // Pull to refresh
+                    RefreshControl(isRefreshing: $isRefreshing) {
+                        postViewModel.fetchAllPosts {
+                            isRefreshing = false
                         }
                     }
-                } else {
-                    LazyVStack(spacing: 20) {
-                        ForEach(likedPosts) { post in
-                            LikedPostView(post: post)
+                    
+                    if postViewModel.isLoading && !isRefreshing {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .padding(.top, 50)
+                    } else if likedPosts.isEmpty {
+                        VStack(spacing: 20) {
+                            Text("아직 좋아요한 게시물이 없습니다.")
+                                .font(.headline)
+                                .padding(.top, 100)
+                            
+                            Button(action: {
+                                selectedTab = 0
+                            }) {
+                                Text("홈으로 돌아가기")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 200, height: 50)
+                                    .background(Color.green) // 앱 디자인에 맞게 변경
+                                    .cornerRadius(12)
+                            }
+                        }
+                    } else {
+                        // UI에서 가져온 섹션 헤더 스타일
+                        LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
+                            Section(header: Text("❤️ 좋아요한 게시물")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.systemGray6))
+                            ) {
+                                ForEach(likedPosts) { post in
+                                    LikedPostView(post: post)
+                                }
+                            }
+                        }
+                        .padding()
+                    }
+                }
+                .refreshable {
+                    await withCheckedContinuation { continuation in
+                        postViewModel.fetchAllPosts {
+                            continuation.resume()
                         }
                     }
-                    .padding()
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .refreshable {
-                await withCheckedContinuation { continuation in
-                    postViewModel.fetchAllPosts {
-                        continuation.resume()
-                    }
-                }
-            }
+            
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("❤️ 좋아요한 게시물")
-                        .font(.headline)
-                        .foregroundColor(.red)
+                    Text("Buddygram")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundStyle(LinearGradient(
+                            gradient: Gradient(colors: [Color.green, Color.green, Color.green, Color.pink, Color.pink, Color.purple]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
                 }
             }
         }
@@ -114,6 +133,7 @@ struct LikedPostView: View {
                     
                     Text(post.ownerUsername)
                         .font(.headline)
+                        .fontWeight(.semibold) // UI에서 가져온 스타일
                         .foregroundColor(.primary)
                     
                     Spacer()
@@ -138,6 +158,7 @@ struct LikedPostView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(height: 300)
                         .clipped()
+                        .cornerRadius(10) // UI에서 가져온 스타일
                 } else {
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))
@@ -147,6 +168,7 @@ struct LikedPostView: View {
                                 .font(.largeTitle)
                                 .foregroundColor(.gray)
                         )
+                        .cornerRadius(10) // UI에서 가져온 스타일
                 }
                 
                 // 캡션 (간단히 표시)
