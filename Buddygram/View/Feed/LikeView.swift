@@ -11,6 +11,7 @@ import FirebaseAuth
 import Kingfisher
 
 struct LikeView: View {
+    @Binding var selectedTab: Int
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var postViewModel: PostViewModel
     @State private var isRefreshing = false
@@ -45,12 +46,7 @@ struct LikeView: View {
                         
                         Button(action: {
                             // 홈 탭으로 이동
-                            // UIKit 방식 대신 selectedTab 바인딩 사용 가능
-                            // selectedTab = 0
-                            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                               let tabBarController = scene.windows.first?.rootViewController as? UITabBarController {
-                                tabBarController.selectedIndex = 0
-                            }
+                            selectedTab = 0
                         }) {
                             Text("홈으로 돌아가기")
                                 .font(.system(size: btnFontSize, weight: .bold))
@@ -341,12 +337,4 @@ struct PostDetailView: View {
             }
         }
     }
-}
-
-
-
-#Preview {
-    LikeView()
-        .environmentObject(AuthViewModel())
-        .environmentObject(PostViewModel())
 }

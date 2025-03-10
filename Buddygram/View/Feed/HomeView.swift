@@ -13,6 +13,7 @@ import Kingfisher
 
 struct HomeView: View {
     // 바인딩 제거, 환경객체 사용
+    @Binding var selectedTab: Int
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var postViewModel: PostViewModel
     @State private var isRefreshing = false
@@ -40,10 +41,8 @@ struct HomeView: View {
                         // 탭 변경을 위해 selectedTab 대신 TabView의 인덱스를 직접 변경
                         Button(action: {
                             // selectedTab 값을 직접 변경하는 방식으로 수정
-                            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                               let tabBarController = scene.windows.first?.rootViewController as? UITabBarController {
-                                tabBarController.selectedIndex = 0
-                            }
+                            selectedTab = 0
+                            
                         }) {
                             Text("첫 게시물 업로드하기")
                                 .font(.system(size: btnFontSize, weight: .bold))
@@ -256,8 +255,3 @@ struct FirebasePostView: View {
     }
 }
 
-#Preview {
-    HomeView()
-        .environmentObject(AuthViewModel())
-        .environmentObject(PostViewModel())
-}

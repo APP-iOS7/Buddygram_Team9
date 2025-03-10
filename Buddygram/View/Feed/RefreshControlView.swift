@@ -40,7 +40,3 @@ struct RefreshControl: View {
         }.frame(height: isRefreshing ? 50 : 0)
     }
 }
-
-#Preview {
-    RefreshControlView()
-}
