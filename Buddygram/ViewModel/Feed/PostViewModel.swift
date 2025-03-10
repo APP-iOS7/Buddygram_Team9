@@ -263,8 +263,66 @@ class PostViewModel: ObservableObject {
     }
     
     // 추가: 마이페이지뷰 (Profile View) 게시물 삭제 함수 추가
-    func deletePost() {
+    func deletePost(postId: String, completion: @escaping (Bool) -> Void = {_ in}) {
+        isLoading = true
+        errorMessage = ""
         
+        let postRef = db.collection("posts").document(postId)
+        
+        postRef.getDocument { [weak self] (document, error) in
+            guard let self = self else { return completion(false) }
+            
+            if let error = error {
+                self.isLoading = false
+                self.errorMessage = "게시물 정보를 가져오는 중 오류가 발생했습니다.: \(error.localizedDescription)"
+                completion(false)
+                return
+            }
+            
+            guard let document = document, document.exists,
+                  let data = document.data(),
+                  let imageURL = data["imageURL"] as? String else {
+                self.isLoading = false
+                self.errorMessage = "게시물 정보가 유효하지 않습니다."
+                completion(false)
+                return
+            }
+            
+            // Firestore 게시물 삭제
+            postRef.delete { [weak self] error in
+                guard let self = self else { return completion(false) }
+                
+                if let error = error {
+                    self.isLoading = false
+                    self.errorMessage = "게시물 삭제 중 오류가 발생했습니다: \(error.localizedDescription)"
+                    completion(false)
+                    return
+                }
+                
+                // Storage 이미지 삭제
+                if let imagePathStart = imageURL.range(of: "post_images/")?.upperBound {
+                    let imagePath = String(imageURL[imagePathStart...])
+                    let storageRef = self.storage.child("post_images/\(imagePath)")
+                    
+                    storageRef.delete { error in
+                        if let error = error {
+                            print("이미지 삭제 중 오류 발생: \(error.localizedDescription)")
+                        }
+                    }
+                    
+                    self.fetchAllPosts {
+                        self.isLoading = false
+                        completion(true)
+                    }
+                    
+                } else {
+                    self.fetchAllPosts {
+                        self.isLoading = false
+                        completion(true)
+                    }
+                }
+            }
+        }
     }
     
 }
