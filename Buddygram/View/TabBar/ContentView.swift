@@ -71,23 +71,6 @@ struct ContentView: View {
                 selectedTab = 0
             } else if newValue && oldValue == false {
                 postViewModel.fetchAllPosts()
-                
-                if let user = authViewModel.currentUser {
-                    let db = Firestore.firestore()
-                    db.collection("users").document(user.id).getDocument { (document, error) in
-                        if let document = document, document.exists {
-                            let data = document.data()
-                            
-                            if data?["firstLogin"] as? Bool != false {
-                                postViewModel.createWelcomePost(for: user)
-                                
-                                db.collection("users").document(user.id).updateData(["firstLogin": false])
-                            }
-                        }
-                        
-                    }
-                    
-                }
             }
         }
         .onAppear {

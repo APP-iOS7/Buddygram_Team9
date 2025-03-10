@@ -261,29 +261,4 @@ class PostViewModel: ObservableObject {
             }
         }
     }
-    
-    // 환영 게시물 생성 (새 사용자용)
-    func createWelcomePost(for user: User, completion: @escaping (Bool) -> Void = {_ in}) {
-        let welcomePostData: [String: Any] = [
-            "ownerUid": "admin", // 관리자 ID
-            "ownerUsername": "Buddygram",
-            "ownerProfileImageURL": "",
-            "caption": "\(user.username)님, Buddygram에 오신 것을 환영합니다! 첫 게시물을 업로드해보세요.",
-            "imageURL": "https://firebasestorage.googleapis.com/v0/b/your-project-id.appspot.com/o/welcome_image.jpg", // 환영 이미지 URL로 수정 필요
-            "likeCount": 1,
-            "commentCount": 0,
-            "createdAt": Timestamp(date: Date()),
-            "likedBy": ["admin"] // 기본적으로 관리자가 좋아요 누름
-        ]
-        
-        db.collection("posts").addDocument(data: welcomePostData) { error in
-            if let error = error {
-                print("환영 게시물 생성 중 오류 발생: \(error.localizedDescription)")
-                completion(false)
-                return
-            }
-            
-            completion(true)
-        }
-    }
 }
