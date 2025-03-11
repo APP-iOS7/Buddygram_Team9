@@ -5,6 +5,9 @@
 
 <br>
 
+## 🎨 제작 과정 
+<img width="600" height="400" alt="Image" src="https://github.com/user-attachments/assets/7dd507ef-8d56-428e-8c58-15de42089d38" />
+
 ## 📸 주요 기능
 1️⃣ 🔑 인증 시스템
 - 이메일 & 비밀번호 회원가입 
