@@ -19,7 +19,7 @@ Pods/
 ### Firebase Patch ###
 .runtimeconfig.json
 .firebase/
-GoogleService-Info.plist
+.GoogleService-Info.plist
 
 # Created by git when using merge tools for conflicts
 *.BACKUP.*
