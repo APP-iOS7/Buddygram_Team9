@@ -13,31 +13,33 @@ import FirebaseFirestore
 import FirebaseStorage
 import Combine
 
+// 사용자 인증을 관리하는 뷰 모델
+// Firebase를 사용하여 로그인, 회원가입, 로그아웃, 사용자 데이터 로드를 처리함
 class AuthViewModel: ObservableObject {
     // 인증 상태
-    @Published var currentUser: User?
-    @Published var isAuthenticated = false
-    @Published var isLoading: Bool = false
+    @Published var currentUser: User? // 현재 로그인된 사용자 정보
+    @Published var isAuthenticated = false // 사용자가 인증되었는지 여부
+    @Published var isLoading: Bool = false // 로딩 상태
     
-    // 로그인, 회원가입 입력 필드
-    @Published var email: String = ""
-    @Published var password: String = ""
-    @Published var username: String = ""
-    @Published var confirmPassword = ""
-    @Published var agreeToTerms = false
+    // 로그인 및 회원가입 입력 필드
+    @Published var email: String = "" // 사용자의 이메일
+    @Published var password: String = "" // 사용자의 비밀번호
+    @Published var username: String = "" // 사용자의 닉네임
+    @Published var confirmPassword = "" // 비밀번호 확인 필드
+    @Published var agreeToTerms = false // 약관 동의 여부
     
-    // 유효성 검사 및 오류 처리
-    @Published var errorMessage: String = ""
-    @Published var isEmailValid: Bool = false
-    @Published var isPasswordValid: Bool = false
-    @Published var isUsernameValid = false
+    // 유효성 검사 및 오류 메시지 관리
+    @Published var errorMessage: String = "" // 오류 메시지 저장
+    @Published var isEmailValid: Bool = false // 이메일 유효성 확인
+    @Published var isPasswordValid: Bool = false // 비밀번호 유효성 확인
+    @Published var isUsernameValid = false // 닉네임 유효성 확인
     
-    private var cancellables = Set<AnyCancellable>()
-    private var handle: AuthStateDidChangeListenerHandle?
+    private var cancellables = Set<AnyCancellable>() // Combine 사용을 위한 저장소
+    private var handle: AuthStateDidChangeListenerHandle? // Firebase 인증 상태 변경 리스너
     
     init() {
-        setupValidations()
-        setupAuthStateListener()
+        setupValidations() // 이메일, 비밀번호 유효성 검사를 설정
+        setupAuthStateListener() // Firebase 인증 상태를 감지하는 리스너 설정
     }
     
     // 추가 : Firebase, 메모리 관리
@@ -48,6 +50,7 @@ class AuthViewModel: ObservableObject {
     }
     
     // 추가 : Firebase 인증 상태 리스너 설정 함수
+    // 사용자의 로그인 상태가 변경될 때마다 호출됨
     private func setupAuthStateListener() {
         handle = Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
             guard let self = self else { return }
@@ -62,6 +65,7 @@ class AuthViewModel: ObservableObject {
     }
     
     // 추가 : Firebase Firestore에서 사용자 정보 가져오는 함수
+    // 로그인된 사용자의 UID를 기반으로 Firestore에서 사용자 정보를 불러옴
     private func fetchUserData(uid: String) {
         let db = Firestore.firestore()
         
@@ -127,6 +131,7 @@ class AuthViewModel: ObservableObject {
     }
     
     // SignIn 로그인
+    // Firebase Authentication을 사용하여 이메일과 비밀번호로 로그인
     func signIn(completion: @escaping (Bool) -> Void = {_ in}) {
         guard !email.isEmpty else {
             errorMessage = "이메일을 입력해주세요."
@@ -249,7 +254,7 @@ class AuthViewModel: ObservableObject {
                 "email": self.email,
                 "createdAt": Timestamp(date: Date()),
                 "likedPostIDs": [],
-                "firstLogin": true // 추가: 첫 로그인 상태 추가 -> HomeView 첫 환영 게시물 
+                "firstLogin": true // 추가: 첫 로그인 상태 추가 -> HomeView 첫 환영 게시물
             ]
             
             db.collection("users").document(user.uid).setData(userData) { error in
@@ -291,6 +296,7 @@ class AuthViewModel: ObservableObject {
     
     
     // SignOut 로그아웃
+    // Firebase Authentication에서 로그아웃하고 필드를 초기화
     func signOut() {
         // 추가: Firebase 로그아웃 로직
         do {
@@ -302,6 +308,8 @@ class AuthViewModel: ObservableObject {
         
     }
     
+    // 필드 초기화 함수
+    // 로그아웃 시 모든 입력 필드 및 오류 메시지를 초기화함
     func resetFields() {
         email = ""
         password = ""
@@ -312,6 +320,7 @@ class AuthViewModel: ObservableObject {
     }
     
     // 추가: Firebase 회원탈퇴
+    // Firebase Storage, Firestroe의 모든 데이터를 삭제하고 Authentication에서 사용자 정보도 삭제 된다.
     func deleteAccount(password: String, completion: @escaping (Bool, String?) -> Void) {
         isLoading = true
         
@@ -405,7 +414,7 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
-
+    
     // 사용자 계정과 데이터 삭제 후 완료 처리하는 보조 함수
     private func deleteUserAndFinish(currentUser: FirebaseAuth.User, db: Firestore, completion: @escaping (Bool, String?) -> Void) {
         // Firestore에서 사용자 문서 삭제

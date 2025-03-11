@@ -31,7 +31,7 @@ struct LikeView: View {
                     .edgesIgnoringSafeArea(.all)
                 
                 ScrollView {
-                    // Pull to refresh
+                    // 당겨서 새로고침
                     RefreshControl(isRefreshing: $isRefreshing) {
                         postViewModel.fetchAllPosts {
                             isRefreshing = false

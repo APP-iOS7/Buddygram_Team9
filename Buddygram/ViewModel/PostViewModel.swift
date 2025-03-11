@@ -11,8 +11,10 @@ import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
-import UIKit
+//import UIKit
 
+// 게시물 관리를 위한 뷰 모델
+// Firebase Firestore에서 게시물을 가져오고, 좋아요, 삭제 등의 기능을 제공
 class PostViewModel: ObservableObject {
     @Published var posts: [Post] = []
     @Published var isLoading = false
@@ -21,7 +23,8 @@ class PostViewModel: ObservableObject {
     private let db = Firestore.firestore()
     private let storage = Storage.storage().reference()
     
-    // HomeView: 게시물 가져오기
+    // 모든 게시물을 Firestore에서 가져오는 함수 (홈 화면에서 사용)
+    // 최신순으로 정렬된 게시물 데이터를 Firestore에서 가져와 posts 배열을 업데이트함
     func fetchAllPosts(completion: @escaping () -> Void = {}) {
         isLoading = true
         errorMessage = ""
@@ -45,6 +48,7 @@ class PostViewModel: ObservableObject {
                     return
                 }
                 
+                // 가져온 데이터를 Post 모델로 변환하여 posts 배열에 저장
                 self.posts = documents.compactMap { document -> Post? in
                     let data = document.data()
                     
@@ -75,7 +79,8 @@ class PostViewModel: ObservableObject {
             }
     }
     
-    // ProfileView: 게시물 가져오기
+    // 특정 사용자의 게시물만 가져오는 함수 (프로필 화면에서 사용)
+    // 사용자 UID를 기반으로 Firestore에서 해당 사용자의 게시물만 가져와서 반환
     func fetchUserPosts(uid: String, completion: @escaping ([Post]) -> Void = {_ in}) {
         isLoading = true
         errorMessage = ""

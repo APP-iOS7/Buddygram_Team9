@@ -153,7 +153,8 @@ struct FirebasePostView: View {
                 // 좋아요 버튼
                 Button(action: {
                     if !postViewModel.isLoading {
-                        toggleLike() // 버그 해결 중 1. 좋아요 버튼                        
+                        toggleLike() // 버그 해결 중 1. 좋아요 버튼
+                        
                     }
                     withAnimation(.easeInOut(duration: 0.3)) {
                         animateLike = isLiked
