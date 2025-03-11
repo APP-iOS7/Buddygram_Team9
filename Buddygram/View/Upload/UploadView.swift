@@ -12,11 +12,13 @@ import UIKit
 import AVFoundation
 
 // UIImagePickerController를 SwiftUI에서 사용하기 위한 래퍼
+// 사용자가 사진을 선택하거나 촬영할 수 있도록 UIKit의 UIImagePickerController를 활용
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
     @Environment(\.presentationMode) var presentationMode
     var sourceType: UIImagePickerController.SourceType
     
+    // Coordinator: UIKit의 Delegate 패턴을 처리하기 위한 클래스
     class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         let parent: ImagePicker
         
@@ -24,6 +26,7 @@ struct ImagePicker: UIViewControllerRepresentable {
             self.parent = parent
         }
         
+        // 사용자가 사진을 선택했을 때 호출되는 함수
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
                 parent.image = image
@@ -31,15 +34,18 @@ struct ImagePicker: UIViewControllerRepresentable {
             parent.presentationMode.wrappedValue.dismiss()
         }
         
+        // 사용자가 취소 버튼을 눌렀을 때 호출되는 함수
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.presentationMode.wrappedValue.dismiss()
         }
     }
     
+    // Coordinator 인스턴스 생성
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
     }
     
+    // UIImagePickerController 인스턴스 생성 및 설정
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
@@ -47,6 +53,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         return picker
     }
     
+    // 업데이트가 필요할 경우 수행 (현재는 필요 없음)
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 }
 
