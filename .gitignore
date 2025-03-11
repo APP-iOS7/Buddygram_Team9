@@ -1,4 +1,6 @@
+*~
 .DS_Store
+GoogleService-Info.plist
 
 # Created by https://www.toptal.com/developers/gitignore/api/xcode,cocoapods,firebase,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=xcode,cocoapods,firebase,git
@@ -19,7 +21,6 @@ Pods/
 ### Firebase Patch ###
 .runtimeconfig.json
 .firebase/
-.GoogleService-Info.plist
 
 # Created by git when using merge tools for conflicts
 *.BACKUP.*
